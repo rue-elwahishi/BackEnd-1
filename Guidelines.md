@@ -7,8 +7,8 @@ All the javascript files should be in lowerCamelCase except for `models` folder 
 ```text
 ├───models
 │   └───ExampleModel.js
-├───services
-│   └───exampleService.js
+├───controller
+│   └───exampleController.js
 ```
 
 ## Folders
