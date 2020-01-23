@@ -16,7 +16,7 @@
 
 ## Status
 
-Flow is in developmennt process
+Flow is in development process
 
 ## What's included
 
