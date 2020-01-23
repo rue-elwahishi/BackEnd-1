@@ -21,6 +21,10 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "dotenv": "^8.2.0",
+>>>>>>> 081f69ca0a6a81672cf505ceea6498a01881d2a1
     "express": "^4.17.1",
     "mongoose": "^5.8.9"
   }
