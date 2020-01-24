@@ -1,9 +1,14 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var hobbiesSchema = new Schema({
+var hobbySchema = new Schema({
   name: String,
-  deactivated: false
+  deactivated: {
+    type: Boolean,
+    default: false
+  }
 });
 
-var Hobbies = mongoose.model("Dislikes", hobbiesSchema);
+var Hobby = mongoose.model("hobby", hobbiesSchema);
+
+module.exports = Hobby;

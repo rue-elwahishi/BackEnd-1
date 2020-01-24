@@ -12,4 +12,5 @@ var followingSchema = new Schema({
   }
 });
 
-var Following = mongoose.model("Following", followingSchema);
+var Following = mongoose.model("following", followingSchema);
+module.exports = Following;
