@@ -31,8 +31,6 @@ Here is the folder structure
 │ 
 ├───helpers
 |
-├───Services
-|
 ├───server
 ```
 ## Contributing
