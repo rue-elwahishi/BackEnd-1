@@ -39,9 +39,9 @@ Here is the folder structure
 
 In order to contribute with a feature or User Story in the project you will need to push in the develop branch
 
-Please read through our [Endpoint guidelines](). Included are directions for making an endpoint and notes on development.
+Please read through our [Endpoint guidelines](https://github.com/The-Odd-Ones/BackEnd/blob/develop/endpoint.md). Included are directions for making an endpoint and notes on development.
 
-Please Read our coding style and contribution [guidelines]().
+Please Read our coding style and contribution [guidelines](https://github.com/The-Odd-Ones/BackEnd/blob/develop/Guidelines.md).
 
 Moreover, all Javascript should conform to the [Code Guide](), maintained by [standard](https://github.com/standard/standard).
 
