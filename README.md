@@ -48,4 +48,4 @@ Moreover, all Javascript should conform to the [Code Guide](), maintained by [st
 ## Thanks
 
 Thanks to the team
->>>>>>> 36da31e3e32220e3ebad5329245c65189d3ec5e2
+
