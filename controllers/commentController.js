@@ -28,7 +28,7 @@ module.exports = app => {
     });
   });
 
-  //show all comment
+  //display all comment
 
   app.get("/comments", (req, res) => {
     Comment.find().then(comments => res.send(comments));
