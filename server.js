@@ -1,22 +1,31 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const mongoose = require('mongoose')
-const connectDB = require('./config/db')
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const cors = require("cors");
+const passport = require("passport");
 const app = express();
-
+const path = require("path");
+const Users = require("./routes/api/users");
 
 //Load env vars
 dotenv.config({
-  path: './config/config.env'
+  path: "./config/config.env"
 });
 
 // DB Connection
-connectDB()
+connectDB();
+// CORS middleware
+app.use(cors());
+// Body parser
+app.use(express.json());
+app.use("/users", Users);
+app.use(passport.initialize());
+app.use(passport.session());
+require("./config/passport")(passport);
+// set static Folder
+// app.use(express.static(path.join(__dirname), "public"));
 
-
-
-
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 2000;
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
