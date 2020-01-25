@@ -4,7 +4,7 @@ const Comment = mongoose.model("comment");
 const bodyParser = require("body-parser");
 
 module.exports = app => {
-  //save new comment in database
+  //save comment in database
   app.post("/:id/comments", (req, res) => {
     var comment = new Comment({
       content: req.body.content,
@@ -14,13 +14,26 @@ module.exports = app => {
     comment.save();
   });
 
-  //save new reply for the comment
+  //add reply for the comment
   app.post("/comments/:id/reply", (req, res) => {
-    Comment.create({
-      content: req.body.content,
-      user: req.user._id,
-      comment: req.params.id
-    });
+    Comment.create(
+      {
+        content: req.body.content,
+        user: req.user._id,
+        comment: req.params.id
+      },
+      (err, user) => {
+        try {
+          res.json({ success: true, msg: "comment registered", user });
+        } catch {
+          res.json({
+            success: false,
+            msg: "error in registering the comment",
+            err
+          });
+        }
+      }
+    );
   });
 
   //display all comment
@@ -36,9 +49,9 @@ module.exports = app => {
       { $set: { content: req.body.content } },
       (err, result) => {
         try {
-          res.json("Comment is updated" + JSON.stringify(result));
+          res.json({ success: true, msg: "Comment updated" });
         } catch {
-          res.send(err);
+          res.json({ success: false, msg: "error in updating the comment" });
         }
       }
     );
@@ -50,7 +63,7 @@ module.exports = app => {
       try {
         res.send("comment is deleted");
       } catch {
-        console.log(err);
+        res.json({ success: false, msg: "error in deleting the comment" });
       }
     });
   });

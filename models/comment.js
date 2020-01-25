@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const commentSchema = new Schema({
   content: String,
   user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
-  deactivated: Boolean,
+  desactivated: { type: Boolean },
   post: { type: mongoose.Schema.Types.ObjectId, ref: "post" },
   comment: { type: mongoose.Schema.Types.ObjectId, ref: "comment" }
 });
