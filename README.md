@@ -26,12 +26,16 @@ Here is the folder structure
 ├───config
 |
 ├───models
+|       ├───index.js
 |
 ├───routes
-│ 
-├───helpers
+│       ├───index.js
 |
-├───Services
+├───helpers
+|       ├───index.js
+|
+├───controllers
+|       ├───index.js
 |
 ├───server
 ```
