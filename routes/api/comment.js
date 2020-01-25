@@ -35,10 +35,10 @@ module.exports = app => {
       { id: req.params.id },
       { $set: { content: req.body.content } },
       (err, result) => {
-        if (err) {
-          res.send(err);
-        } else {
+        try {
           res.json("Comment is updated" + JSON.stringify(result));
+        } catch {
+          res.send(err);
         }
       }
     );
@@ -47,10 +47,11 @@ module.exports = app => {
   //delete a comment
   app.delete("/comments/:id", (req, res) => {
     Comment.deleteOne({ id: req.params.id }, err => {
-      if (err) {
+      try {
+        res.send("comment is deleted");
+      } catch {
         console.log(err);
       }
-      res.send("comment is deleted");
     });
   });
 };

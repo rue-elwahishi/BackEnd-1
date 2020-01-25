@@ -49,5 +49,6 @@ const deleteComment = (id, callback) => {
 };
 
 exports.createComment = createComment;
+exports.getAllComment = getAllComment;
 exports.updateComment = updateComment;
 exports.deleteComment = deleteComment;
