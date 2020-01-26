@@ -16,7 +16,7 @@
 
 ## Status
 
-Flow is in developmennt process
+Flow is in development process
 
 ## What's included
 
@@ -34,9 +34,12 @@ Here is the folder structure
 ├───helpers
 |       ├───index.js
 |
+<<<<<<< HEAD
 ├───controllers
 |       ├───index.js
 |
+=======
+>>>>>>> 089e046a45a28e8e021f6bd84ae1867663614038
 ├───server
 ```
 ## Contributing
