@@ -1,3 +1,4 @@
 module.exports = {
-    user : require('./user.js')
+    User : require('./user.js'),
+    Comment : require("./comment.js")
 }

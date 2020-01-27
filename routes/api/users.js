@@ -4,12 +4,12 @@ const Controllers = require("../../controllers/index");
 
 
 // Register
-Router.post("/register", Controllers.user.signUp);
+Router.post("/register", Controllers.User.signUp);
 
 
-Router.post("/authenticate", Controllers.user.logIn);
+Router.post("/authenticate", Controllers.User.logIn);
 
 
-Router.get("/verify", Controllers.user.verifyToken);
+Router.get("/verify", Controllers.User.verifyToken);
 
 module.exports = Router;
