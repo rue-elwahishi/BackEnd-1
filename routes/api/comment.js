@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-const commentSchema = require("../../models/comment");
+const commentSchema = require("../models/comment");
 const Comment = mongoose.model("comment");
-const bodyParser = require("body-parser");
-
+const commentController = require("../../controllers/commentController");
 module.exports = app => {
-  //save comment in database
+  //save  comment in database
   app.post("/:id/comments", (req, res) => {
     var comment = new Comment({
       content: req.body.content,
@@ -14,32 +13,26 @@ module.exports = app => {
     comment.save();
   });
 
-  //add reply for the comment
+  //save reply for the comment
   app.post("/comments/:id/reply", (req, res) => {
-    Comment.create(
-      {
-        content: req.body.content,
-        user: req.user._id,
-        comment: req.params.id
-      },
-      (err, user) => {
-        try {
-          res.json({ success: true, msg: "comment registered", user });
-        } catch {
-          res.json({
-            success: false,
-            msg: "error in registering the comment",
-            err
-          });
-        }
-      }
-    );
+    Comment.create({
+      content: req.body.content,
+      user: req.user._id,
+      comment: req.params.id
+    });
   });
 
   //display all comment
 
   app.get("/comments", (req, res) => {
-    Comment.find().then(comments => res.send(comments));
+    Comment.getAllComment((err, result) => {
+      if (err) {
+        res.status(404).send(err);
+      } else {
+        res.status(200).send(result);
+        res.end();
+      }
+    });
   });
 
   //update the comment
@@ -48,10 +41,10 @@ module.exports = app => {
       { id: req.params.id },
       { $set: { content: req.body.content } },
       (err, result) => {
-        try {
-          res.json({ success: true, msg: "Comment updated" });
-        } catch {
-          res.json({ success: false, msg: "error in updating the comment" });
+        if (err) {
+          res.send(err);
+        } else {
+          res.json("Comment is updated" + JSON.stringify(result));
         }
       }
     );
@@ -60,11 +53,10 @@ module.exports = app => {
   //delete a comment
   app.delete("/comments/:id", (req, res) => {
     Comment.deleteOne({ id: req.params.id }, err => {
-      try {
-        res.send("comment is deleted");
-      } catch {
-        res.json({ success: false, msg: "error in deleting the comment" });
+      if (err) {
+        console.log(err);
       }
+      res.send("comment is deleted");
     });
   });
 };

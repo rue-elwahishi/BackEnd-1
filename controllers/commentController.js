@@ -4,15 +4,16 @@ const Comment = mongoose.model("comment");
 const bodyParser = require("body-parser");
 const express = require("express");
 
-//create new comment
-const createComment = (comment, callback) => {
-  var comment = new Comment({
-    content: req.body.content,
-    user: req.user._id,
-    post: req.params.id
-  });
-  comment.save(callback);
-};
+// //create new comment
+// const createComment = callback => {
+//   var comment = new Comment({
+//     content: req.body.content,
+//     user: req.user._id,
+//     post: req.params.id
+//   });
+//   comment.save(callback);
+// };
+
 //get all comments
 var getAllComment = callback => {
   Comment.find((err, data) => {
@@ -25,17 +26,17 @@ var getAllComment = callback => {
 };
 
 //update comment
-const updateComment = (id, callback) => {
-  Comment.findOneAndUpdate({ _id: id })
-    .populate("comment")
-    .exec((err, comment) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, comment);
-      }
-    });
-};
+// const updateComment = (id, callback) => {
+//   Comment.findOneAndUpdate({ _id: id })
+//     .populate("comment")
+//     .exec((err, comment) => {
+//       if (err) {
+//         callback(err, null);
+//       } else {
+//         callback(null, comment);
+//       }
+//     });
+// };
 
 //delete comment
 const deleteComment = (id, callback) => {
@@ -48,7 +49,7 @@ const deleteComment = (id, callback) => {
   });
 };
 
-exports.createComment = createComment;
+// exports.createComment = createComment;
 exports.getAllComment = getAllComment;
-exports.updateComment = updateComment;
+// exports.updateComment = updateComment;
 exports.deleteComment = deleteComment;
