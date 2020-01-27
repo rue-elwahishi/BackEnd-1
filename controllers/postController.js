@@ -2,6 +2,23 @@ const Post = require("../models/post");
 const Event = require("../models/Event")
 const User = require("../models/user")
 
+exports.createPost = (req, res) => {
+  try {
+    var post = new Post({
+      content: req.params.content,
+      _user: req.params._user,
+      _hobby: req.params._hobby,
+      _event: req.params._event,
+      deactivated: false,
+      file : req.params.file,
+      createdAt: req.params.createdAt
+    });
+    post.save();
+    res.json({ success: true, post });
+  } catch (err) {
+    res.json({ success: false, err });
+  }
+};
 // using for new users that didn't choose their interrest
 exports.getPosts = async (req, res, next) => {
   try {
