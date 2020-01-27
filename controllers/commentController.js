@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const commentSchema = require("../models/comment");
 const Comment = mongoose.model("comment");
 const bodyParser = require("body-parser");
-const express = require("express");
 
 //create new comment
 const createComment = (req, res) => {
