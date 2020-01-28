@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 
 //create new comment
-const createComment = (req, res) => {
+module.exports.createComment = (req, res) => {
   try {
     var comment = new Comment({
       content: req.body.content,
@@ -20,7 +20,7 @@ const createComment = (req, res) => {
 };
 
 //create reply comment
-var createReply = (req, res) => {
+module.exports.createReply = (req, res) => {
   try {
     Comment.create({
       content: req.body.content,
@@ -33,7 +33,7 @@ var createReply = (req, res) => {
 };
 
 //display comment
-var displayAll = async (req, res) => {
+module.exports.displayAll = async (req, res) => {
   try {
     var page = req.query.page;
     var comments = await Comment.find({ post: req.params.id })
@@ -46,7 +46,7 @@ var displayAll = async (req, res) => {
 };
 
 //update comment
-const updateComment = (req, res) => {
+module.exports.updateComment = (req, res) => {
   try {
     var comments = Comment.update(
       { id: req.params.id },
@@ -59,17 +59,11 @@ const updateComment = (req, res) => {
 };
 
 //delete comment
-const deleteComment = (req, res) => {
+module.exports.deleteComment = (req, res) => {
   try {
     Comment.deleteOne({ id: req.params.id });
     res.json({ success: true });
   } catch (err) {
     res.json({ success: false, err });
   }
-};
-
-exports.createComment = createComment;
-exports.createReply = createReply;
-exports.displayAll = displayAll;
-exports.updateComment = updateComment;
-exports.deleteComment = deleteComment;
+}
