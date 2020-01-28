@@ -6,7 +6,7 @@ const eventSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   desactivated: { type: Boolean, default: false },
-  hobby: { type: Schema.Types.ObjectId, ref: "hobby" },
+  community: { type: Schema.Types.ObjectId, ref: "community" },
   file: { type: String }
 });
 module.exports = mongoose.model("event", eventSchema);

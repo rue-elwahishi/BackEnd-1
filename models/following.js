@@ -10,8 +10,8 @@ var followingSchema = new Schema({
     ref: "user",
     type: Schema.Types.ObjectId
   },
-  hobby: {
-    ref: 'hobby',
+  community: {
+    ref: 'community',
     type: Schema.Types.ObjectId
   }
 });
