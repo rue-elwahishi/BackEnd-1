@@ -12,4 +12,4 @@ var dislikesSchema = new Schema({
   }
 });
 
-var Dislikes = mongoose.model("Dislikes", dislikesSchema);
+var Dislikes = mongoose.model("dislike", dislikesSchema);
