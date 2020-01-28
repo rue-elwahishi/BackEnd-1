@@ -38,10 +38,10 @@ const UserSchema = new mongoose.Schema({
   bio: {
     type: String
   },
-  admin: {
+  isAdmin: {
     type: Boolean,
     default: false
   }
 });
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("user", UserSchema);

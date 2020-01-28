@@ -1,21 +1,21 @@
 const mongoose = require('mongoose')
 
-const PostSchema = new mongoose.Schema({
+const PostSchema = mongoose.Schema({
     content: {
         type: String,
         required: [true, 'please enter a body']
     },
-    _user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
     },
-    _hobby: {
-        type: Schema.Types.ObjectId,
-        ref: 'Hobby'
+    hobby: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'hobby'
     },
-    _event: {
-        type: Schema.Types.ObjectId,
-        ref: 'Event'
+    event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'event'
     },
     deactivated: {
         type: Boolean,
@@ -23,11 +23,7 @@ const PostSchema = new mongoose.Schema({
     },
     file: {
         type: String
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
 })
 
-module.exports = mongoose.model('Post', PostSchema)
+module.exports = mongoose.model('post', PostSchema)
