@@ -3,10 +3,10 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const passport = require("passport");
-const {Hobby} = require("./models/index.js")
+// const {Community} = require("./models/index.js")
 const app = express();
 const path = require("path");
-const Routes = require("./routes/api/index");
+const {users,comments,posts,communities} = require("./routes/api/index.js");
 
 //Load env vars
 dotenv.config({
@@ -24,9 +24,10 @@ app.use(passport.session());
 require("./config/passport")(passport);
 // set static Folder
 // app.use(express.static(path.join(__dirname), "public"));
-app.use("/api/users", Routes.users);
-app.use("/api/comments", Routes.comments);
-app.use("/api/posts", Routes.posts);
+app.use("/api/users", users);
+app.use("/api/comments", comments);
+app.use("/api/posts", posts);
+app.use("/api/communities", communities);
 const PORT = process.env.PORT || 2000;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);

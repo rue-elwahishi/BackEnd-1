@@ -1,5 +1,5 @@
 const Post = require("../models/post");
-const Event = require("../models/Event")
+const Event = require("../models/event")
 const User = require("../models/user")
 
 module.exports.createPost = async (req, res) => {
@@ -7,7 +7,7 @@ module.exports.createPost = async (req, res) => {
     var post = new Post({
       content: req.body.content,
       user: req.user._id,
-      hobby: req.hobby._id,
+      community: req.community._id,
       file : req.body.file
     });
   const onePost =  await post.save();
@@ -35,7 +35,7 @@ module.exports.getPosts = async (req, res, next) => {
 module.exports.getPostsByUserId = async (req, res, next) => {
 
   try {
-    const posts = await Post.find({user:req.params.id, hobby:req.hobby._id}).populate("user")
+    const posts = await Post.find({user:req.params.id, community:req.community._id}).populate("user")
     res.json({
         success: true,
         result: posts 

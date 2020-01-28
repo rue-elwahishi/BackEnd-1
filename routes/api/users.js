@@ -1,14 +1,14 @@
 const express = require("express");
 const Router = express.Router();
-const Controllers = require("../../controllers/index");
-const helpers = require('../../helpers/index.js')
+const {UsersController, PostsController} = require("../../controllers/index");
+const {CommunityMiddleware, AuthMiddleware} = require('../../helpers/index.js')
 
 
 // Register
-Router.post("/register", Controllers.User.signUp);
-Router.post("/authenticate", Controllers.User.logIn);
-Router.get("/verify", Controllers.User.verifyToken);
-Router.get('/:id/posts', helpers.AuthMiddleWare, helpers.HobbyMiddleWare ,Controllers.Post.getPostsByUserId)
+Router.post("/register", UsersController.signUp);
+Router.post("/authenticate", UsersController.logIn);
+Router.get("/verify", UsersController.verifyToken);
+Router.get('/:id/posts', AuthMiddleware, CommunityMiddleware ,PostsController.getPostsByUserId)
 
 
 

@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var hobbySchema = Schema({
+var communitySchema = Schema({
   name: String,
   deactivated: {
     type: Boolean,
@@ -9,6 +9,6 @@ var hobbySchema = Schema({
   }
 });
 
-var Hobby = mongoose.model("hobby", hobbySchema);
+var Community = mongoose.model("community", communitySchema);
 
-module.exports = Hobby;
+module.exports = Community;
