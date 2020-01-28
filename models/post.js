@@ -9,9 +9,9 @@ const PostSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
-    hobby: {
+    community: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'hobby'
+        ref: 'community'
     },
     event: {
         type: mongoose.Schema.Types.ObjectId,

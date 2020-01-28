@@ -1,5 +1,6 @@
 module.exports = {
-    User : require('./user.js'),
-    Comment : require("./comment.js"),
-    Post : require('./post.js')
+    UsersController : require('./users.js'),
+    CommentsController : require("./comments.js"),
+    PostsController : require('./posts.js'),
+    CommunititesController : require('./communities.js')
 }

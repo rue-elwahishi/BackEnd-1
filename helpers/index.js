@@ -1,4 +1,4 @@
 module.exports = {
-    AuthMiddleWare : require('./auth.js'),
-    HobbyMiddleWare : require('./hobbyMiddleware.js')
+    AuthMiddleware : require('./auth.js'),
+    CommunityMiddleware : require('./communityMiddleware.js')
 }
