@@ -39,10 +39,11 @@ module.exports.getPostsByUserId = async (req, res, next) => {
       community: req.community._id
     }).populate("user");
     res.json({
-      success: false,
-      msg: "something went wrong",
-      err
+      success: true,
+      result: posts
     });
+  } catch (err) {
+    res.json({ success: false, msg: "failed to fetch posts", err });
   }
 };
 //
