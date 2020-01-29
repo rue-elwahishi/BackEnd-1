@@ -9,6 +9,7 @@ module.exports.makeEvent = async (req,res)=>{
           }
           req.body.file = file.url
         }
+        req.body.community = req.community._id
         req.body.location =  JSON.parse(req.body.location)
         
         res.json({ success: true, result: await Event.create(req.body)});
