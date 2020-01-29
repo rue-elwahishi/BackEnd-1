@@ -1,6 +1,6 @@
 const Router = module.exports = require("express").Router()
-const { HobbyMiddleWare, AuthMiddleWare } = require('../../helpers/index.js');
-const {Post} = require('../../controllers/index')
+const { CommunityMiddleware, AuthMiddleware } = require('../../helpers/index.js');
+const {PostsController} = require('../../controllers/index')
 
 
-Router.post('/', AuthMiddleWare, HobbyMiddleWare, Post.createPost) 
+Router.post('/', AuthMiddleware, CommunityMiddleware, PostsController.createPost) 

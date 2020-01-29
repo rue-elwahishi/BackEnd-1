@@ -4,9 +4,9 @@ module.exports = {
     Dislike: require('./dislike.js'),
     Like: require('./like.js'),
     Post: require('./post.js'),
-    Event: require('./Event.js'),
+    Event: require('./event.js'),
     Following: require('./following.js'),
     Participation : require('./participation.js'),
-    Hobby: require('./hobby.js')
+    Community: require('./community.js')
 
 }
