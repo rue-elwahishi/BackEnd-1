@@ -3,5 +3,5 @@ module.exports = {
   comments: require("./comment"),
   posts: require("./posts"),
   communities: require("./communitites.js"),
-  events: require("./events")
+  events: require("./events.js")
 };

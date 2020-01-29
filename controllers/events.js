@@ -1,30 +1,17 @@
-const Event = require("../models/event");
-
-//create new event
-module.exports.createEvent = (req, res) => {
+const { cloudinary } = require("../helpers/index.js");
+const { Event } = require("../models/index.js");
+module.exports.makeEvent = async (req, res) => {
   try {
-    var event = new Event({
-      user: req.params.id,
-      title: req.body.title,
-      description: req.body.description,
-      community: req.body.community,
-      file: req.body.file
-    });
-    event.save();
-    res.json({ success: true, event });
-  } catch (err) {
-    res.json({ success: false, err });
-  }
-};
+    if (req.file) {
+      let file;
+      if (req.file.mimetype.match(/jpg|jpeg|png|gif/i)) {
+        file = await cloudinary.v2.uploader.upload(req.file.path);
+      }
+      req.body.file = file.url;
+    }
+    req.body.location = JSON.parse(req.body.location);
 
-//display events
-module.exports.displayAll = async (req, res) => {
-  try {
-    var page = req.query.page;
-    var events = await Event.find({ community: req.community._id })
-      .limit(30)
-      .skip(page * 30);
-    res.json({ success: true, events });
+    res.json({ success: true, result: await Event.create(req.body) });
   } catch (err) {
     res.json({ success: false, err });
   }

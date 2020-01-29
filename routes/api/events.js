@@ -1,13 +1,24 @@
-const mongoose = require("mongoose");
-const { EventsController } = require("../../controllers/index");
-const Router = (module.exports = require("express").Router());
-const { CommunityMiddleware, AuthMiddleware } = require("../../helpers/index");
+const express = require("express");
+const Router = express.Router();
+const {
+  UsersController,
+  PostsController,
+  EventsController
+} = require("../../controllers/index");
+const {
+  CommunityMiddleware,
+  AuthMiddleware,
+  uploadMiddleware
+} = require("../../helpers/index.js");
 
-Router.post("/:id/events", EventsController.createEvent);
+// Register
 
-Router.get(
-  "/events",
+Router.post(
+  "/",
   AuthMiddleware,
   CommunityMiddleware,
-  EventsController.displayAll
+  uploadMiddleware.single("file"),
+  EventsController.makeEvent
 );
+
+module.exports = Router;
