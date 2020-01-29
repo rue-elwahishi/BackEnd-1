@@ -6,7 +6,13 @@ const passport = require("passport");
 // const {Community} = require("./models/index.js")
 const app = express();
 const path = require("path");
-const {users,comments,posts,communities} = require("./routes/api/index.js");
+const {
+  users,
+  comments,
+  posts,
+  communities,
+  events
+} = require("./routes/api/index.js");
 
 //Load env vars
 dotenv.config({
@@ -28,6 +34,7 @@ app.use("/api/users", users);
 app.use("/api/comments", comments);
 app.use("/api/posts", posts);
 app.use("/api/communities", communities);
+app.use("/api/events", events);
 const PORT = process.env.PORT || 2000;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
