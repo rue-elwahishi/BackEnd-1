@@ -3,5 +3,6 @@ module.exports = {
   CommentsController: require("./comments.js"),
   PostsController: require("./posts.js"),
   CommunititesController: require("./communities.js"),
-  EventsController: require("./events.js")
+  FollowingsController: require("./following.js"),
+  EventsController: require("./events")
 };

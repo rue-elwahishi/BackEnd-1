@@ -16,3 +16,31 @@ module.exports.makeEvent = async (req, res) => {
     res.json({ success: false, err });
   }
 };
+
+module.exports.showEvent = async (req, res, next) => {
+  try {
+    const events = await Event.find();
+    res.status(200).json({
+      success: true
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      msg: err.message
+    });
+  }
+};
+
+module.exports.showEvent = async (req, res) => {
+  try {
+    const events = await Event.find({});
+    res.status(200).json({
+      success: true
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      msg: err.message
+    });
+  }
+};
