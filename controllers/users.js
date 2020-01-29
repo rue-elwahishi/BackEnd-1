@@ -4,6 +4,7 @@ const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 
 module.exports.signUp = async (req, res, next) => {
+  console.log(req.body)
   try {
     if (await User.findOne({ username: req.body.username }))
       return res.json({ success: false, msg: "username exists" });
@@ -17,7 +18,7 @@ module.exports.signUp = async (req, res, next) => {
     await newUser.save();
     res.json({ success: true, msg: "you've signed up successfully" });
   } catch (err) {
-    res.json({ success: false, msg: "something went wrong", err });
+    res.json({ success: false, msg: `something went wrong : ${err}` });
   }
 };
 module.exports.logIn = async (req, res, next) => {
@@ -40,7 +41,7 @@ module.exports.logIn = async (req, res, next) => {
       res.json({ success: false, msg: "Password is incorrect" });
     }
   } catch (err) {
-    res.json({ success: false, msg: "something went wrong", err });
+    res.json({ success: false, msg: `something went wrong : ${err}` });
   }
 };
 module.exports.verifyToken = async (req, res) => {
