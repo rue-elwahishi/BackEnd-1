@@ -1,33 +1,17 @@
 const Post = require("../models/post");
-
 const Event = require("../models/event");
 const User = require("../models/user");
 
-const {cloudinary}   = require('../helpers/index.js')
-
-
 module.exports.createPost = async (req, res) => {
   try {
-    if(req.file){
-      let file;
-      if(req.file.mimetype.match(/mp4|mkv|avi/i)){
-    file = await cloudinary.v2.uploader.upload(req.file.path,  { resource_type: "video" })
-
-      }else if(req.file.mimetype.match(/jpg|jpeg|png|gif/i)){
-    file = await cloudinary.v2.uploader.upload(req.file.path)
-      }
-      req.body.file = file.url
-    }
     var post = new Post({
       content: req.body.content,
       user: req.user._id,
-      community: req.community._id,
+      hobby: req.hobby._id,
       file: req.body.file
     });
-
-  const result =  await post.save();
-    res.json({ success: true, result });
-
+    const onePost = await post.save();
+    res.json({ success: true, result: onePost });
   } catch (err) {
     res.json({ success: false, err });
   }
@@ -59,7 +43,11 @@ module.exports.getPostsByUserId = async (req, res, next) => {
       result: posts
     });
   } catch (err) {
-    res.json({ success: false, msg: "failed to fetch posts", err });
+    res.json({
+      success: false,
+      msg: "something went wrong",
+      err
+    });
   }
 };
 //
