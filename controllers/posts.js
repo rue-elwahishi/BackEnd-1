@@ -1,17 +1,28 @@
-const Post = require("../models/post");
-const Event = require("../models/event");
-const User = require("../models/user");
+const { Post, Following, Like, Comment } = require("../models/index.js");
+
+const { cloudinary } = require("../helpers/index.js");
 
 module.exports.createPost = async (req, res) => {
   try {
+    if (req.file) {
+      let file;
+      if (req.file.mimetype.match(/mp4|mkv|avi/i)) {
+        file = await cloudinary.v2.uploader.upload(req.file.path, {
+          resource_type: "video"
+        });
+      } else if (req.file.mimetype.match(/jpg|jpeg|png|gif/i)) {
+        file = await cloudinary.v2.uploader.upload(req.file.path);
+      }
+      req.body.file = file.url;
+    }
     var post = new Post({
       content: req.body.content,
       user: req.user._id,
       community: req.community._id,
       file: req.body.file
     });
-    const onePost = await post.save();
-    res.json({ success: true, result: onePost });
+    const result = await post.save();
+    res.json({ success: true, result });
   } catch (err) {
     res.json({ success: false, err });
   }
@@ -19,18 +30,35 @@ module.exports.createPost = async (req, res) => {
 // using for new users that didn't choose their interrest
 module.exports.getPosts = async (req, res, next) => {
   try {
-    const posts = await Post.find();
-    res.status(200).json({
-      success: true,
-      data: users
+    const userId = req.user._id;
+    const communityId = req.community._id;
+    let users = await Following.find({
+      follower: userId,
+      community: communityId
+    }).select("followed");
+    var mapped = users.map(one => {
+      return { user: one.followed };
     });
+
+    mapped.push({ user: userId });
+    let posts = mapped.length
+      ? await Post.find({
+          $and: [{ $or: mapped }, { community: communityId }]
+        })
+          .sort({ _id: -1 })
+          .lean()
+          .populate("user")
+      : [];
+    await utils(posts, req.user);
+    res.json({ posts });
   } catch (err) {
-    res.status(400).json({
+    res.json({
       success: false,
       msg: err.message
     });
   }
 };
+
 //
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
@@ -49,10 +77,8 @@ module.exports.getPostsByUserId = async (req, res, next) => {
 //
 module.exports.getPostByEvent = async (req, res, next) => {
   try {
-    let event = req.params._event;
-    const posts = await Post.find({ _event: event })
-      .populate("Event")
-      .exec((err, posts) => console.log("posts"));
+    let event = req.event;
+    const posts = await Post.find({ event }).populate("Event");
     res.status(200).json({
       success: false,
       msg: err.message
@@ -67,8 +93,8 @@ module.exports.getPostByEvent = async (req, res, next) => {
 //
 module.exports.getPostByHobby = async (req, res, next) => {
   try {
-    let hobby = req.params._hobby;
-    const posts = await Post.find({ _hobby: hobby })
+    let hobby = req.community;
+    const posts = await Post.find({ community })
       .populate("Hobby")
       .exec((err, posts) => console.log("posts"));
     res.status(200).json({
@@ -85,9 +111,9 @@ module.exports.getPostByHobby = async (req, res, next) => {
 //
 module.exports.getPostByUserInHobby = async (req, res, next) => {
   try {
-    let user = req.params._user;
-    let hobby = req.params._hobby;
-    const posts = await Post.find({ _user: user, _hobby: hobby })
+    let user = req.user;
+    let hobby = req.community;
+    const posts = await Post.find({ user, community })
       .populate("User")
       .populate("Hobby")
       .exec((err, posts) => console.log(posts));
@@ -104,21 +130,39 @@ module.exports.getPostByUserInHobby = async (req, res, next) => {
 };
 //
 module.exports.getPostByUserInEvent = async (req, res, next) => {
-  try {
-    let user = req.params._user;
-    let event = req.params._event;
-    const posts = await Post.find({ _user: user, _event: event })
-      .populate("User")
-      .populate("Event")
-      .exec((err, posts) => console.log(posts));
-    res.status(200).json({
-      success: false,
-      msg: err.message
-    });
-  } catch {
-    res.status(400).json({
-      success: false,
-      msg: err.message
-    });
-  }
+  // try {
+  //   let user = req.params._user;
+  //   let event = req.params._event;
+  //   const posts = await Post.find({ user: user, event: event })
+  //     // .populate(["User"])
+  //     .exec((err, posts) => console.log(posts));
+  //   res.status(200).json({
+  //     success: false,
+  //     msg: err.message
+  //   });
+  // } catch {
+  //   res.status(400).json({
+  //     success: false,
+  //     msg: err.message
+  //   });
+  // }
 };
+
+async function utils(posts, user) {
+  async function commentsCount(post) {
+    post.commentsCount = await Comment.count({ post: post._id });
+  }
+  async function likesCount(post) {
+    post.likesCount = await Like.count({ post: post._id });
+  }
+  async function isLiked(post) {
+    post.isLiked = await Like.exists({ post: post._id, user: user._id });
+  }
+  for (let i = 0; i < posts.length; i++) {
+    await Promise.all([
+      commentsCount(posts[i]),
+      likesCount(posts[i]),
+      isLiked(posts[i])
+    ]);
+  }
+}
