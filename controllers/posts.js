@@ -21,6 +21,7 @@ module.exports.createPost = async (req, res) => {
       community: req.community._id,
       file: req.body.file
     });
+
     const result = await post.save();
     res.json({ success: true, result });
   } catch (err) {
@@ -49,7 +50,7 @@ module.exports.getPosts = async (req, res, next) => {
           .lean()
           .populate("user")
       : [];
-    await utils(posts, req.user);
+    await postFeatures(posts, req.user);
     res.json({ posts });
   } catch (err) {
     res.json({
@@ -148,7 +149,7 @@ module.exports.getPostByUserInEvent = async (req, res, next) => {
   // }
 };
 
-async function utils(posts, user) {
+async function postFeatures(posts, user) {
   async function commentsCount(post) {
     post.commentsCount = await Comment.count({ post: post._id });
   }
