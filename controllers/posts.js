@@ -60,7 +60,7 @@ module.exports.getPosts = async (req, res, next) => {
   }
 };
 
-//
+//get post by event id
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
     const posts = await Post.find({
