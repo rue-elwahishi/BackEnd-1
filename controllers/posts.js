@@ -159,11 +159,28 @@ async function postFeatures(posts, user) {
   async function isLiked(post) {
     post.isLiked = await Like.exists({ post: post._id, user: user._id });
   }
-  for (let i = 0; i < posts.length; i++) {
-    await Promise.all([
-      commentsCount(posts[i]),
-      likesCount(posts[i]),
-      isLiked(posts[i])
-    ]);
-  }
+  await Promise.all(posts.map(post => {
+    return Promise.all([
+          commentsCount(post),
+          likesCount(post),
+          isLiked(post)
+        ])
+  }))
+  // let Promises = []
+  // for (let i = 0; i < posts.length; i++) {
+  //   console.log('hi')
+  //  await Promise.all([
+  //         commentsCount(posts[i]),
+  //         likesCount(posts[i]),
+  //         isLiked(posts[i])
+  //       ])
+  // }
+  // for (let i = 0; i < posts.length; i++) {
+  //   Promises.push(Promise.all([
+  //     commentsCount(posts[i]),
+  //     likesCount(posts[i]),
+  //     isLiked(posts[i])
+  //   ]));
+  // }
+  // await Promise.all(Promises)
 }
