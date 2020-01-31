@@ -8,4 +8,4 @@ const likeSchema = new Schema({
   comment: { type: Schema.Types.ObjectId, ref: "comment" }
 });
 
-mongoose.model("like", likeSchema);
+module.exports = mongoose.model("like", likeSchema);
