@@ -21,7 +21,7 @@ dotenv.config({
 
 // DB Connection
 connectDB();
-// CORS middleware
+// CORS middleware,on
 app.use(cors());
 // Body parser
 app.use(express.json());

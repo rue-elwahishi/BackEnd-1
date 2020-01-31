@@ -19,28 +19,16 @@ module.exports.makeEvent = async (req, res) => {
 
 module.exports.showEvent = async (req, res, next) => {
   try {
-    const events = await Event.find();
-    res.status(200).json({
-      success: true
+    const event = await Event.findById(req.params.id);
+    res.json({
+      success: true,
+      result: event
     });
   } catch (err) {
-    res.status(400).json({
+    res.json({
       success: false,
-      msg: err.message
-    });
-  }
-};
-
-module.exports.showEvent = async (req, res) => {
-  try {
-    const events = await Event.find({});
-    res.status(200).json({
-      success: true
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      msg: err.message
+      msg: "failed to retrieve event",
+      err
     });
   }
 };

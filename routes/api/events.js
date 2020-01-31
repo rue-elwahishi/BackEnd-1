@@ -21,4 +21,6 @@ Router.post(
   EventsController.makeEvent
 );
 
+Router.get("/:id", EventsController.showEvent);
+
 module.exports = Router;
