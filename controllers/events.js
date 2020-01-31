@@ -30,7 +30,6 @@ module.exports.showEvent = async (req, res, next) => {
       msg: "failed to retrieve event",
       err
     });
-    res.json({ success: true, result: await Event.create(req.body) });
   }
 };
 

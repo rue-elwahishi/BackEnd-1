@@ -27,6 +27,8 @@ Router.get(
   EventsController.nearby
 );
 
-Router.get("/:id", EventsController.showEvent);
+Router.get("/:id", AuthMiddleware, EventsController.showEvent);
+
+Router.get("/:id/posts", AuthMiddleware, PostsController.getPostByEvent);
 
 module.exports = Router;
