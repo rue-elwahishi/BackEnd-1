@@ -30,5 +30,29 @@ module.exports.showEvent = async (req, res, next) => {
       msg: "failed to retrieve event",
       err
     });
+    res.json({ success: true, result: await Event.create(req.body) });
+  }
+};
+
+module.exports.nearby = async (req, res) => {
+  try {
+    let result = await Event.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [36.77429914811174, 10.19528999023441]
+          },
+          distanceField: "dist.calculated",
+          maxDistance: 2,
+          includeLocs: "dist.location",
+          spherical: true
+        }
+      },
+      { $match: { community: req.community._id } }
+    ]);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.json({ success: false, msg: "not working", err });
   }
 };

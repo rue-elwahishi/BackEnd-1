@@ -20,6 +20,12 @@ Router.post(
   uploadMiddleware.single("file"),
   EventsController.makeEvent
 );
+Router.get(
+  "/nearby",
+  AuthMiddleware,
+  CommunityMiddleware,
+  EventsController.nearby
+);
 
 Router.get("/:id", EventsController.showEvent);
 
