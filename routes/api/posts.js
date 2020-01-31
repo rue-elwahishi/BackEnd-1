@@ -13,4 +13,5 @@ Router.post(
   uploadMiddleware.single("file"),
   PostsController.createPost
 );
+
 Router.get("/", AuthMiddleware, CommunityMiddleware, PostsController.getPosts);
