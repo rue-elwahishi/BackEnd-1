@@ -102,3 +102,21 @@ async function userFeatures(user, community, you) {
     isYou ? null : followedByYou()
   ]);
 }
+
+module.exports.updateUser = async (req, res) => {
+  try {
+    var result = await User.findByIdAndUpdate(req.user._id, {
+      $set: {
+        bio: req.body.bio,
+        firstname: req.body.firstname,
+        lastname: req.body.firstname,
+        password: await bcrypt.hash(req.body.password, 10),
+        email: req.body.email
+      }
+    });
+
+    res.json({ success: true, msg: "settings updated", result });
+  } catch (err) {
+    res.json({ success: false, err, msg: "failed to update user settings" });
+  }
+};

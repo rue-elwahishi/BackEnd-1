@@ -38,5 +38,18 @@ Router.get(
   CommunityMiddleware,
   FollowingsController.getFollowings
 );
+Router.get(
+  "/:id/follow",
+  AuthMiddleware,
+  CommunityMiddleware,
+  FollowingsController.follow
+);
 
+Router.get(
+  "/:id/unfollow",
+  AuthMiddleware,
+  CommunityMiddleware,
+  FollowingsController.unfollow
+);
+Router.patch("/settings", AuthMiddleware, UsersController.updateUser);
 module.exports = Router;
