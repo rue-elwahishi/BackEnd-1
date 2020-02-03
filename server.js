@@ -14,6 +14,7 @@ const {
   events
 } = require("./routes/api/index.js");
 
+
 //Load env vars
 dotenv.config({
   path: "./config/config.env"
@@ -24,6 +25,7 @@ connectDB();
 // CORS middleware,on
 app.use(cors());
 // Body parser
+// Community.create({name: "Art"})
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());

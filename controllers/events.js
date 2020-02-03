@@ -33,6 +33,21 @@ module.exports.showEvent = async (req, res, next) => {
     });
   }
 };
+module.exports.showEvents = async (req, res, next) => {
+  try {
+    const events = await Event.find({community: req.community._id}).sort({_id : -1});
+    res.json({
+      success: true,
+      result: events
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      msg: "failed to retrieve events",
+      err
+    });
+  }
+};
 
 module.exports.nearby = async (req, res) => {
   try {

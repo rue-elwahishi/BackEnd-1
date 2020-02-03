@@ -23,6 +23,10 @@ const PostSchema = mongoose.Schema({
     },
     file: {
         type: String
+    },
+    sharedpost: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'post'
     }
 })
 

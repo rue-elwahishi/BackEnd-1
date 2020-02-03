@@ -26,6 +26,7 @@ Router.get(
   CommunityMiddleware,
   EventsController.nearby
 );
+Router.get("/", AuthMiddleware, CommunityMiddleware, EventsController.showEvents);
 
 Router.get("/:id", AuthMiddleware, EventsController.showEvent);
 

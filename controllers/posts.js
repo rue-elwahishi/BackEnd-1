@@ -28,6 +28,23 @@ module.exports.createPost = async (req, res) => {
     res.json({ success: false, err });
   }
 };
+
+module.exports.sharePost = async (req, res) => {
+  try {
+    var post = new Post({
+      content: req.body.content,
+      user: req.user._id,
+      community: req.community._id,
+      sharedpost: req.params.id
+    });
+
+    const result = await post.save();
+    res.json({ success: true, result });
+  } catch (err) {
+    res.json({ success: false, err });
+  }
+};
+
 // using for new users that didn't choose their interrest
 module.exports.getPosts = async (req, res, next) => {
   try {
@@ -48,7 +65,7 @@ module.exports.getPosts = async (req, res, next) => {
         })
           .sort({ _id: -1 })
           .lean()
-          .populate("user")
+          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
       : [];
     await postFeatures(posts, req.user);
     res.json({ posts });
@@ -60,6 +77,21 @@ module.exports.getPosts = async (req, res, next) => {
   }
 };
 
+module.exports.getPost = async (req, res, next) => {
+  try {
+    let post = await Post.findOne({ _id: req.params.id, community:req.community._id  })
+          .lean()
+          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
+      ;
+    await postFeatures([post], req.user);
+    res.json({ success : true, result : post });
+  } catch (err) {
+    res.json({
+      success: false,
+      msg: err.message
+    });
+  }
+};
 //get post by event id
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
@@ -159,11 +191,19 @@ async function postFeatures(posts, user) {
   async function isLiked(post) {
     post.isLiked = await Like.exists({ post: post._id, user: user._id });
   }
+  async function isShared(post){
+    post.isShared = await Post.exists({user:user._id, sharedpost : post._id })
+  }
+  async function sharesCount(post){
+    post.sharesCount = await Post.count({sharedpost : post._id })
+  }
   await Promise.all(posts.map(post => {
     return Promise.all([
           commentsCount(post),
           likesCount(post),
-          isLiked(post)
+          isLiked(post),
+          isShared(post),
+          sharesCount(post)
         ])
   }))
   // let Promises = []
