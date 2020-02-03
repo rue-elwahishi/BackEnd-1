@@ -7,7 +7,8 @@ const {
 } = require("../../controllers/index");
 const {
   CommunityMiddleware,
-  AuthMiddleware
+  AuthMiddleware,
+  uploadMiddleware
 } = require("../../helpers/index.js");
 
 // Register
@@ -51,5 +52,10 @@ Router.get(
   CommunityMiddleware,
   FollowingsController.unfollow
 );
-Router.patch("/settings", AuthMiddleware, UsersController.updateUser);
+Router.patch(
+  "/settings",
+  AuthMiddleware,
+  uploadMiddleware.single("file"),
+  UsersController.updateUser
+);
 module.exports = Router;
