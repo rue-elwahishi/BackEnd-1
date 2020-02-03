@@ -3,6 +3,7 @@ const { User, Following } = require("../models/index.js");
 const Controllers = require("../controllers/index.js");
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
+const { cloudinary } = require("../helpers/index.js");
 
 module.exports.signUp = async (req, res, next) => {
   console.log(req.body);
@@ -105,13 +106,23 @@ async function userFeatures(user, community, you) {
 
 module.exports.updateUser = async (req, res) => {
   try {
+    if (req.file) {
+      let file;
+      if (req.file.mimetype.match(/jpg|jpeg|png/i)) {
+        file = await cloudinary.v2.uploader.upload(req.file.path);
+      }
+      console.log(file);
+      req.body.file = file.url;
+    }
+
     var result = await User.findByIdAndUpdate(req.user._id, {
       $set: {
         bio: req.body.bio,
         firstname: req.body.firstname,
         lastname: req.body.firstname,
         password: await bcrypt.hash(req.body.password, 10),
-        email: req.body.email
+        email: req.body.email,
+        file: req.body.file
       }
     });
 
