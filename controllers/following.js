@@ -1,15 +1,24 @@
 const { Following } = require("../models/index.js");
 
-module.exports.follow = async (req, res, next) => {
+module.exports.follow = async (req, res) => {
   try {
+    if (req.user._id.toString() === req.params.id)
+      res.json({ success: false, msg: "u can't follow yourself" });
     const user = req.user._id;
     const friend = req.params.id;
-    await Following.create({
+    const alreadyFollowing = await Following.exists({
       follower: user,
       followed: friend,
       community: req.community._id
     });
-    res.json({ success: true });
+    if (!alreadyFollowing) {
+      await Following.create({
+        follower: user,
+        followed: friend,
+        community: req.community._id
+      });
+      res.json({ success: true });
+    } else return;
   } catch (err) {
     res.json({ success: false, msg: "following failed" });
   }
