@@ -25,7 +25,7 @@ connectDB();
 // CORS middleware,on
 app.use(cors());
 // Body parser
-// Community.create({name: "Art"})
+// Community.create({name: "Science"})
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
