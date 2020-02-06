@@ -1,5 +1,5 @@
 const {cloudinary} = require("../helpers/index.js")
-const {Event} = require('../models/index.js')
+const {Event, Like, Dislike} = require('../models/index.js')
 module.exports.makeEvent = async (req,res)=>{
     try {
         if(req.file){
@@ -20,7 +20,8 @@ module.exports.makeEvent = async (req,res)=>{
 
 module.exports.showEvent = async (req, res, next) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).lean();
+    await eventFeatures([event] , req.user)
     res.json({
       success: true,
       result: event
@@ -35,7 +36,9 @@ module.exports.showEvent = async (req, res, next) => {
 };
 module.exports.showEvents = async (req, res, next) => {
   try {
-    const events = await Event.find({community: req.community._id}).sort({_id : -1});
+    const events = await Event.find({community: req.community._id}).sort({_id : -1}).lean();
+    await eventFeatures(events , req.user)
+
     res.json({
       success: true,
       result: events
@@ -71,3 +74,32 @@ module.exports.nearby = async (req, res) => {
     res.json({ success: false, msg: "not working", err });
   }
 };
+
+
+async function eventFeatures(events, user) {
+  async function likesCount(event) {
+    event.likesCount = await Like.count({ event: event._id });
+  }
+  async function dislikesCount(event) {
+    event.dislikesCount = await Dislike.count({ event: event._id });
+
+  }
+  async function isLiked(event) {
+    event.isLiked = await Like.exists({ event: event._id, user: user._id });
+
+  }
+  async function isDisliked(event) {
+    event.isDisliked = await Dislike.exists({ event: event._id, user: user._id });
+
+  }
+  
+  await Promise.all(events.map(event => {
+    return Promise.all([
+          likesCount(event),
+          isLiked(event),
+          dislikesCount(event),
+          isDisliked(event),
+        ])
+  }))
+
+}

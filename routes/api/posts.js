@@ -5,7 +5,7 @@ const {
   AuthMiddleware,
   uploadMiddleware
 } = require("../../helpers/index.js");
-const { PostsController, LikesController} = require("../../controllers/index");
+const { PostsController, LikesController, CommentsController} = require("../../controllers/index");
 
 Router.post(
   "/",
@@ -19,6 +19,8 @@ Router.get("/", AuthMiddleware, CommunityMiddleware, PostsController.getPosts);
 Router.get("/:id", AuthMiddleware,CommunityMiddleware, PostsController.getPost);
 
 Router.get('/:id/like' , AuthMiddleware, LikesController.likePost)
+Router.get('/:id/comments' , AuthMiddleware, CommentsController.displayAll)
+Router.post('/:id/comment' , AuthMiddleware, CommentsController.createComment)
 Router.post('/:id/share' , AuthMiddleware, CommunityMiddleware, PostsController.sharePost)
 
 // Router.get('/try' , CommunityMiddleware, async (req,res)=>{
