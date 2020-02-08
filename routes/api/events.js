@@ -45,6 +45,7 @@ Router.get("/", AuthMiddleware, CommunityMiddleware, EventsController.showEvents
 Router.get("/:id", AuthMiddleware, EventsController.showEvent);
 Router.get("/:id/like", AuthMiddleware, LikesController.likeEvent);
 Router.get("/:id/dislike", AuthMiddleware, LikesController.dislikeEvent);
+Router.get('/:id/enrollment' , AuthMiddleware, EventsController.toggleEnrollment)
 
 
 

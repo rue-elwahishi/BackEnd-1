@@ -1,5 +1,5 @@
 const {cloudinary} = require("../helpers/index.js")
-const {Event, Like, Dislike} = require('../models/index.js')
+const {Event, Like, Dislike, Participation} = require('../models/index.js')
 module.exports.makeEvent = async (req,res)=>{
     try {
         if(req.file){
@@ -75,6 +75,19 @@ module.exports.nearby = async (req, res) => {
   }
 };
 
+module.exports.toggleEnrollment = async (req,res)=>{
+  try{
+    var found = await Participation.findOneAndDelete({event: req.params.id , participant : req.user._id})
+    if(found){
+        res.json({success : true,removed: true})
+    }else{
+        await Participation.create({event : req.params.id, participant:req.user._id}),
+        res.json({success : true,created: true})
+}
+}catch(err){
+    res.json({success : false, msg:err.message})
+}
+}
 
 async function eventFeatures(events, user) {
   async function likesCount(event) {
@@ -84,13 +97,19 @@ async function eventFeatures(events, user) {
     event.dislikesCount = await Dislike.count({ event: event._id });
 
   }
+  async function enrollsCount(event) {
+    event.enrollsCount = await Participation.count({ event: event._id });
+
+  }
   async function isLiked(event) {
     event.isLiked = await Like.exists({ event: event._id, user: user._id });
 
   }
   async function isDisliked(event) {
     event.isDisliked = await Dislike.exists({ event: event._id, user: user._id });
-
+  }
+  async function isEnrolled(event) {
+    event.isEnrolled = await Participation.exists({ event: event._id, participant: user._id });
   }
   
   await Promise.all(events.map(event => {
@@ -99,6 +118,8 @@ async function eventFeatures(events, user) {
           isLiked(event),
           dislikesCount(event),
           isDisliked(event),
+          isEnrolled(event),
+          enrollsCount(event)
         ])
   }))
 

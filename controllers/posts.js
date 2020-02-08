@@ -124,10 +124,13 @@ module.exports.getPost = async (req, res, next) => {
 //get post by event id
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
-    const posts = await Post.find({
+    let posts = await Post.find({
       user: req.params.id,
       community: req.community._id
-    }).populate("user");
+    }).sort({ _id: -1 })
+    .lean()
+    .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
+    await postFeatures(posts, req.user)
     res.json({
       success: true,
       result: posts
