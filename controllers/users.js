@@ -1,15 +1,24 @@
 const bcrypt = require("bcryptjs");
-const { User, Following } = require("../models/index.js");
-const Controllers = require("../controllers/index.js");
+const { User } = require("../models/index.js");
+
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../helpers/index.js");
+const { userFeatures } = require("../helpers/userFeatures.js");
 
 module.exports.signUp = async (req, res, next) => {
   console.log(req.body);
   try {
     if (await User.findOne({ username: req.body.username }))
       return res.json({ success: false, msg: "username exists" });
+    if (!req.body.password || req.body.password.length < 8)
+      return res.json({
+        success: false,
+        msg: "password should be 8 digits or more"
+      });
+    if (await User.findOne({ email: req.body.email }))
+      return res.json({ success: false, msg: "email exists" });
+
     let newUser = new User({
       firstname: req.body.firstname,
       lastname: req.body.lastname,
@@ -60,49 +69,12 @@ module.exports.verifyToken = async (req, res) => {
 module.exports.getUser = async (req, res) => {
   try {
     var user = await User.findOne({ username: req.params.username }).lean();
-    await userFeatures(user, req.community, req.user);
+    await userFeatures([user], req.community, req.user);
     res.json({ success: true, result: user });
   } catch (err) {
     res.json({ success: false, err, msg: "failed to fetch user" });
   }
 };
-
-async function userFeatures(user, community, you) {
-  var isYou = user.username === you.username;
-  async function followersCount() {
-    user.followersCount = await Following.count({
-      followed: user._id,
-      community: community._id
-    });
-  }
-  async function followingsCount() {
-    user.followingsCount = await Following.count({
-      follower: user._id,
-      community: community._id
-    });
-  }
-  async function followsYou() {
-    user.followsYou = await Following.exists({
-      followed: you._id,
-      follower: user._id,
-      community: community._id
-    });
-  }
-  async function followedByYou() {
-    user.followedByYou = await Following.exists({
-      followed: user._id,
-      follower: you._id,
-      community: community._id
-    });
-  }
-
-  return await Promise.all([
-    followersCount(),
-    followingsCount(),
-    isYou ? null : followsYou(),
-    isYou ? null : followedByYou()
-  ]);
-}
 
 module.exports.updateUser = async (req, res) => {
   try {
@@ -130,4 +102,24 @@ module.exports.updateUser = async (req, res) => {
   } catch (err) {
     res.json({ success: false, err, msg: "failed to update user settings" });
   }
+};
+
+module.exports.search = (req, res) => {
+  var regex = { $regex: req.query.keyword, $options: "i" };
+
+  User.aggregate([
+    {
+      $project: {
+        name: { $concat: ["$firstname", " ", "$lastname"] },
+        username: "$username"
+      }
+    },
+    { $match: { $or: [{ name: regex }, { username: regex }] } }
+  ])
+    .then(results => {
+      res.json({ success: true, results });
+    })
+    .catch(err => {
+      res.json({ success: false, err });
+    });
 };

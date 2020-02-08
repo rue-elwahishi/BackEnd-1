@@ -21,6 +21,8 @@ Router.get(
   CommunityMiddleware,
   PostsController.getPostsByUserId
 );
+Router.get("/search", AuthMiddleware, UsersController.search);
+
 Router.get(
   "/:username",
   AuthMiddleware,
@@ -58,4 +60,5 @@ Router.patch(
   uploadMiddleware.single("file"),
   UsersController.updateUser
 );
+
 module.exports = Router;
