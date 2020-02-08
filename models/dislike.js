@@ -12,4 +12,4 @@ var dislikesSchema = new Schema({
   }
 });
 
-var Dislike = mongoose.model("dislike", dislikesSchema);
+module.exports = mongoose.model("dislike", dislikesSchema);

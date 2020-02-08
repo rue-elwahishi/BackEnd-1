@@ -12,7 +12,7 @@ const {
 } = require("../../helpers/index.js");
 
 // Register
-Router.post("/register", UsersController.signUp);
+Router.post("/register", UsersController.signUp, UsersController.logIn);
 Router.post("/authenticate", UsersController.logIn);
 Router.get("/verify", UsersController.verifyToken);
 Router.get(
