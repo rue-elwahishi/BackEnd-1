@@ -38,6 +38,7 @@ app.use("/api/posts", posts);
 app.use("/api/communities", communities);
 app.use("/api/events", events);
 const PORT = process.env.PORT || 2000;
+app.get('/' , (req,res)=> res.json({project : "Communities", team : "Us"}))
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
