@@ -7,7 +7,6 @@ const { cloudinary } = require("../helpers/index.js");
 const { userFeatures } = require("../helpers/userFeatures.js");
 
 module.exports.signUp = async (req, res, next) => {
-  console.log(req.body);
   try {
     if (await User.findOne({ username: req.body.username }))
       return res.json({ success: false, msg: "username exists" });
@@ -27,7 +26,7 @@ module.exports.signUp = async (req, res, next) => {
       password: await bcrypt.hash(req.body.password, 10)
     });
     await newUser.save();
-    res.json({ success: true, msg: "you've signed up successfully" });
+    next();
   } catch (err) {
     res.json({ success: false, msg: `something went wrong : ${err}` });
   }

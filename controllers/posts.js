@@ -106,7 +106,7 @@ module.exports.getPosts = async (req, res, next) => {
 
 module.exports.getPost = async (req, res, next) => {
   try {
-    let post = await Post.findOne({ _id: req.params.id, community:req.community._id  })
+    let post = await Post.findById(req.params.id)
           .lean()
           .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
     post.comments = await Comment.find({ post: post._id }).sort({_id : -1}).populate('user')
