@@ -17,6 +17,22 @@ module.exports.makeEvent = async (req, res) => {
   }
 };
 
+module.exports.showEvent = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    res.json({
+      success: true,
+      result: event
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      msg: "failed to retrieve event",
+      err
+    });
+  }
+};
+
 module.exports.nearby = async (req, res) => {
   try {
     let result = await Event.aggregate([

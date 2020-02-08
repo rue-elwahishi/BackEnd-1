@@ -6,7 +6,13 @@ const passport = require("passport");
 // const {Community} = require("./models/index.js")
 const app = express();
 const path = require("path");
-const {users,comments,posts,communities,events} = require("./routes/api/index.js");
+const {
+  users,
+  comments,
+  posts,
+  communities,
+  events
+} = require("./routes/api/index.js");
 
 //Load env vars
 dotenv.config({
@@ -15,7 +21,7 @@ dotenv.config({
 
 // DB Connection
 connectDB();
-// CORS middleware
+// CORS middleware,on
 app.use(cors());
 // Body parser
 app.use(express.json());

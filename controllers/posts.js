@@ -60,7 +60,7 @@ module.exports.getPosts = async (req, res, next) => {
   }
 };
 
-//
+//get post by event id
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
     console.log(req.params.id);
@@ -79,16 +79,16 @@ module.exports.getPostsByUserId = async (req, res, next) => {
 //
 module.exports.getPostByEvent = async (req, res, next) => {
   try {
-    let event = req.event;
-    const posts = await Post.find({ event }).populate("Event");
-    res.status(200).json({
-      success: false,
-      msg: err.message
+    const posts = await Post.find({ event: req.params.id });
+    res.json({
+      success: true,
+      result: posts
     });
-  } catch {
-    res.status(400).json({
+  } catch (err) {
+    res.json({
       success: false,
-      msg: err.message
+      msg: "failed to retrieve posts",
+      err
     });
   }
 };

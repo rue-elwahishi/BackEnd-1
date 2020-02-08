@@ -1,8 +1,4 @@
-const mongoose = require("mongoose");
 const commentSchema = require("../models/comment");
-const Comment = mongoose.model("comment");
-const bodyParser = require("body-parser");
-const express = require("express");
 
 //create new comment
 module.exports.createComment = (req, res) => {
@@ -66,4 +62,4 @@ module.exports.deleteComment = (req, res) => {
   } catch (err) {
     res.json({ success: false, err });
   }
-}
+};
