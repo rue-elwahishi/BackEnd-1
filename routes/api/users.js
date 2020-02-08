@@ -12,7 +12,7 @@ const {
 } = require("../../helpers/index.js");
 
 // Register
-Router.post("/register", UsersController.signUp);
+Router.post("/register", UsersController.signUp, UsersController.logIn);
 Router.post("/authenticate", UsersController.logIn);
 Router.get("/verify", UsersController.verifyToken);
 Router.get(
@@ -21,6 +21,8 @@ Router.get(
   CommunityMiddleware,
   PostsController.getPostsByUserId
 );
+Router.get("/search", AuthMiddleware, UsersController.search);
+
 Router.get(
   "/:username",
   AuthMiddleware,
@@ -58,4 +60,5 @@ Router.patch(
   uploadMiddleware.single("file"),
   UsersController.updateUser
 );
+
 module.exports = Router;

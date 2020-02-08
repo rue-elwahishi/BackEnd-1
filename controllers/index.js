@@ -4,5 +4,6 @@ module.exports = {
   PostsController: require("./posts.js"),
   CommunititesController: require("./communities.js"),
   FollowingsController: require("./following.js"),
-  EventsController: require("./events.js")
+  EventsController: require("./events.js"),
+  LikesController : require('./likes.js')
 };
