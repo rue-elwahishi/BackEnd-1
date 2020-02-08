@@ -1,4 +1,5 @@
 const { Following } = require("../models/index.js");
+const { userFeatures } = require("../helpers/userFeatures.js");
 
 module.exports.follow = async (req, res) => {
   try {
@@ -34,7 +35,7 @@ module.exports.unfollow = async (req, res) => {
     });
     res.json({ success: true });
   } catch (err) {
-    res.json({ success: false, msg: "unfollowing failed" });
+    res.json({ success: false, msg: "unfollowing failed", err });
   }
 };
 
@@ -44,7 +45,14 @@ module.exports.getFollowings = async (req, res) => {
     const result = await Following.find({
       follower,
       community: req.community._id
-    }).populate("followed");
+    })
+      .populate("followed")
+      .lean();
+    await userFeatures(
+      result.map(following => following.followed),
+      req.community,
+      req.user
+    );
     res.json({ success: true, msg: "got all following", result });
   } catch (err) {
     res.json({ success: false, msg: "failed to fetch" });
@@ -53,11 +61,21 @@ module.exports.getFollowings = async (req, res) => {
 module.exports.getFollowers = async (req, res) => {
   try {
     const followed = req.params.id;
+
     const result = await Following.find({
       followed,
       community: req.community._id
-    }).populate("follower");
+    })
+      .populate("follower")
+      .lean();
+    await userFeatures(
+      result.map(followings => followings.follower),
+      req.community,
+      req.user
+    );
+
     res.json({ success: true, msg: "got all followers", result });
+    console.log(result);
   } catch (err) {
     res.json({ success: false });
   }

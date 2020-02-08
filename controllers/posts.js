@@ -63,6 +63,7 @@ module.exports.getPosts = async (req, res, next) => {
 //
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
+    console.log(req.params.id);
     const posts = await Post.find({
       user: req.params.id,
       community: req.community._id
