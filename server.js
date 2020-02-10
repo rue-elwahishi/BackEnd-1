@@ -11,7 +11,8 @@ const {
   comments,
   posts,
   communities,
-  events
+  events,
+  notifications
 } = require("./routes/api/index.js");
 
 
@@ -25,7 +26,7 @@ connectDB();
 // CORS middleware,on
 app.use(cors());
 // Body parser
-// Community.create({name: "Science"})
+// Community.create({name: "BeatBox"})
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -37,7 +38,8 @@ app.use("/api/comments", comments);
 app.use("/api/posts", posts);
 app.use("/api/communities", communities);
 app.use("/api/events", events);
-const PORT = process.env.PORT || 2000;
+app.use("/api/notifications", notifications);
+const PORT = process.env.PORT || 8080;
 app.get('/' , (req,res)=> res.json({project : "Communities", team : "Us"}))
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
