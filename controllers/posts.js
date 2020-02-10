@@ -104,6 +104,7 @@ module.exports.getPosts = async (req, res, next) => {
   }
 };
 
+
 module.exports.getPost = async (req, res, next) => {
   try {
     let post = await Post.findById(req.params.id)
@@ -121,6 +122,7 @@ module.exports.getPost = async (req, res, next) => {
     });
   }
 };
+
 //get post by event id
 module.exports.getPostsByUserId = async (req, res, next) => {
   try {
@@ -141,8 +143,28 @@ module.exports.getPostsByUserId = async (req, res, next) => {
 };
 //
 
+module.exports.getPostByEvent = async (req, res, next) => {
+  try {
+    const posts = await Post.find({ event: req.params.id });
+    res.json({
+      success: true,
+      result: posts
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      msg: "failed to retrieve posts",
+      err
+    });
+  }
+};
+//
+
+
+
 
 module.exports.getPostsByEvent = async (req, res, next) => {
+
   try {
     const posts = await Post.find({ event: req.params.id })
           .sort({ _id: -1 })
