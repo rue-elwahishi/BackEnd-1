@@ -69,7 +69,9 @@ module.exports.verifyToken = async (req, res) => {
 module.exports.getUser = async (req, res) => {
   try {
     var user = await User.findOne({ username: req.params.username }).lean();
+    console.log(user);
     await userFeatures([user], req.community, req.user);
+
     res.json({ success: true, result: user });
   } catch (err) {
     res.json({ success: false, err, msg: "failed to fetch user" });
