@@ -1,4 +1,8 @@
+
+const commentSchema = require("../models/comment");
+
 const {Comment, User, Like} = require("../models/index.js");
+
 
 //create new comment
 module.exports.createComment = async (req, res) => {
@@ -110,3 +114,4 @@ var commentFeatures = module.exports.commentFeatures = async (comments, user)=> 
   }))
 
 }
+

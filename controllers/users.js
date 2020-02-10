@@ -155,7 +155,8 @@ module.exports.search = (req, res) => {
     {
       $project: {
         name: { $concat: ["$firstname", " ", "$lastname"] },
-        username: "$username"
+        username: "$username",
+        image: "$file"
       }
     },
     { $match: { $or: [{ name: regex }, { username: regex }] } }
