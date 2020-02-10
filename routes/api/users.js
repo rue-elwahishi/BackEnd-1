@@ -12,6 +12,8 @@ const {
 } = require("../../helpers/index.js");
 
 // Register
+
+Router.get('/recommendations' , AuthMiddleware, CommunityMiddleware, UsersController.recommendations)
 Router.post("/register", UsersController.signUp, UsersController.logIn);
 Router.post("/authenticate", UsersController.logIn);
 Router.get("/verify", UsersController.verifyToken);
