@@ -41,7 +41,11 @@ const UserSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
-  }
+  },
+  facebook : String,
+  twitter : String,
+  linkedIn : String,
+  instagram:String
 });
 
 module.exports = mongoose.model("user", UserSchema);

@@ -3,7 +3,8 @@ const Router = express.Router();
 const {
   UsersController,
   PostsController,
-  EventsController
+  EventsController,
+  LikesController
 } = require("../../controllers/index");
 const {
   CommunityMiddleware,
@@ -20,12 +21,33 @@ Router.post(
   uploadMiddleware.single("file"),
   EventsController.makeEvent
 );
+Router.post(
+  "/:id/posts",
+  AuthMiddleware,
+  uploadMiddleware.single("file"),
+  PostsController.createEventPost
+);
+
+Router.get(
+  "/:id/posts",
+  AuthMiddleware,
+  PostsController.getPostsByEvent
+);
+
 Router.get(
   "/nearby",
   AuthMiddleware,
   CommunityMiddleware,
   EventsController.nearby
 );
+Router.get("/", AuthMiddleware, CommunityMiddleware, EventsController.showEvents);
+
+Router.get("/:id", AuthMiddleware, EventsController.showEvent);
+Router.get("/:id/like", AuthMiddleware, LikesController.likeEvent);
+Router.get("/:id/dislike", AuthMiddleware, LikesController.dislikeEvent);
+Router.get('/:id/enrollment' , AuthMiddleware, EventsController.toggleEnrollment)
+
+
 
 Router.get("/:id", AuthMiddleware, EventsController.showEvent);
 
