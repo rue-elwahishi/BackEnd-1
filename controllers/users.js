@@ -1,10 +1,48 @@
 const bcrypt = require("bcryptjs");
-const { User } = require("../models/index.js");
+const { User, Following, Like, Post } = require("../models/index.js");
 
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../helpers/index.js");
 const { userFeatures } = require("../helpers/userFeatures.js");
+
+module.exports.recommendations = async (req, res) => {
+  try {
+    let posts = await Like.aggregate()
+      .match({ user: req.user._id, post: { $ne: null } })
+      .project({ _id: "$post" });
+    let postsByCommunity = await Post.aggregate()
+      .match({
+        $and: [
+          { $or: posts.length ? posts : [{ _id: null }] },
+          { community: req.community._id }
+        ]
+      })
+      .project({ post: "$_id", _id: false });
+    let following = await Following.aggregate()
+      .match({ follower: req.user._id, community: req.community._id })
+      .project({ user: "$followed", _id: false });
+    let recommendations = await Like.aggregate()
+      .match({
+        $and: [
+          { $or: postsByCommunity.length ? postsByCommunity : [{ _id: null }] },
+          { user: { $ne: req.user._id } },
+          following.length ? { $nor: following } : {}
+        ]
+      })
+      .group({ _id: "$user", posts: { $push: "$post" } })
+      .sort({ posts: 1 });
+    let users = await User.populate(recommendations, {
+      path: "_id",
+      options: { lean: true }
+    });
+    users = users.map(one => one._id);
+    await userFeatures(users, req.community, req.user);
+    res.json(users);
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+};
 
 module.exports.signUp = async (req, res, next) => {
   console.log(req.body);
@@ -80,15 +118,50 @@ module.exports.getUser = async (req, res) => {
 
 module.exports.updateUser = async (req, res) => {
   try {
+    if (!(await bcrypt.compare(req.body.oldpassword, req.user.password)))
+      return res.json({ success: false, msg: "Password is incorrect" });
+
+    if (req.body.username && req.body.username != req.user.username) {
+      if (await User.findOne({ username: req.body.username }))
+        return res.json({ success: false, msg: "Username exists" });
+    }
+    if (req.body.password && req.body.password != req.body.confirmation)
+      return res.json({
+        success: false,
+        msg: "new password confimation is wrong"
+      });
+
     if (req.file) {
       let file;
       if (req.file.mimetype.match(/jpg|jpeg|png/i)) {
         file = await cloudinary.v2.uploader.upload(req.file.path);
       }
-      console.log(file);
-      req.body.file = file.url;
+    } else req.body.file = req.user.file;
+    var data = {
+      bio: true,
+      firstname: true,
+      lastname: true,
+      username: true,
+      password: true,
+      email: true,
+      file: true,
+      facebook: true,
+      twitter: true,
+      instagram: true,
+      linkedIn: true
+    };
+    var entries = Object.entries(req.body);
+    for (let i = 0; i < entries.length; i++) {
+      let one = entries[i];
+      if (one[0] == "password") {
+        if (one[1]) data[one[0]] = await bcrypt.hash(one[1], 10);
+        else delete data[one[0]];
+      } else {
+        if (one[1] && data[one[0]] && one[1] != req.user[one[0]])
+          data[one[0]] = one[1];
+        else delete data[one[0]];
+      }
     }
-
     var result = await User.findByIdAndUpdate(req.user._id, {
       $set: {
         bio: req.body.bio,

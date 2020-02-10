@@ -7,6 +7,7 @@ module.exports = {
     Event: require('./event.js'),
     Following: require('./following.js'),
     Participation : require('./participation.js'),
-    Community: require('./community.js')
+    Community: require('./community.js'),
+    Notification:require('./notification.js')
 
 }
