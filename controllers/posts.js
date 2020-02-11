@@ -1,5 +1,5 @@
 const { Post, Following, Like, Comment } = require("../models/index.js");
-const {commentFeatures} = require('./comments.js')
+const { commentFeatures } = require("./comments.js");
 const { cloudinary } = require("../helpers/index.js");
 
 module.exports.createPost = async (req, res) => {
@@ -74,6 +74,7 @@ module.exports.sharePost = async (req, res) => {
 
 // using for new users that didn't choose their interrest
 module.exports.getPosts = async (req, res, next) => {
+  console.log(req.body);
   try {
     const userId = req.user._id;
     const communityId = req.community._id;
@@ -92,7 +93,10 @@ module.exports.getPosts = async (req, res, next) => {
         })
           .sort({ _id: -1 })
           .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
+          .populate([
+            "user",
+            { path: "sharedpost", populate: { path: "user" } }
+          ])
       : [];
     await postFeatures(posts, req.user);
     res.json({ posts });
@@ -107,13 +111,19 @@ module.exports.getPosts = async (req, res, next) => {
 module.exports.getPost = async (req, res, next) => {
   try {
     let post = await Post.findById(req.params.id)
-          .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-    post.comments = await Comment.find({ post: post._id }).sort({_id : -1}).populate('user')
-    .limit(5).lean()
-    await Promise.all([postFeatures([post], req.user), commentFeatures(post.comments,req.user)])
-    
-    res.json({ success : true, result : post });
+      .lean()
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+    post.comments = await Comment.find({ post: post._id })
+      .sort({ _id: -1 })
+      .populate("user")
+      .limit(5)
+      .lean();
+    await Promise.all([
+      postFeatures([post], req.user),
+      commentFeatures(post.comments, req.user)
+    ]);
+
+    res.json({ success: true, result: post });
   } catch (err) {
     res.json({
       success: false,
@@ -127,10 +137,11 @@ module.exports.getPostsByUserId = async (req, res, next) => {
     let posts = await Post.find({
       user: req.params.id,
       community: req.community._id
-    }).sort({ _id: -1 })
-    .lean()
-    .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-    await postFeatures(posts, req.user)
+    })
+      .sort({ _id: -1 })
+      .lean()
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+    await postFeatures(posts, req.user);
     res.json({
       success: true,
       result: posts
@@ -141,16 +152,15 @@ module.exports.getPostsByUserId = async (req, res, next) => {
 };
 //
 
-
 module.exports.getPostsByEvent = async (req, res, next) => {
   try {
     const posts = await Post.find({ event: req.params.id })
-          .sort({ _id: -1 })
-          .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-      
+      .sort({ _id: -1 })
+      .lean()
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+
     await postFeatures(posts, req.user);
-    res.json({ success : true , result : posts });
+    res.json({ success: true, result: posts });
   } catch (err) {
     res.json({
       success: false,
@@ -208,20 +218,21 @@ async function postFeatures(posts, user) {
   async function isLiked(post) {
     post.isLiked = await Like.exists({ post: post._id, user: user._id });
   }
-  async function isShared(post){
-    post.isShared = await Post.exists({user:user._id, sharedpost : post._id })
+  async function isShared(post) {
+    post.isShared = await Post.exists({ user: user._id, sharedpost: post._id });
   }
-  async function sharesCount(post){
-    post.sharesCount = await Post.count({sharedpost : post._id })
+  async function sharesCount(post) {
+    post.sharesCount = await Post.count({ sharedpost: post._id });
   }
-  await Promise.all(posts.map(post => {
-    return Promise.all([
-          commentsCount(post),
-          likesCount(post),
-          isLiked(post),
-          isShared(post),
-          sharesCount(post)
-        ])
-  }))
-
+  await Promise.all(
+    posts.map(post => {
+      return Promise.all([
+        commentsCount(post),
+        likesCount(post),
+        isLiked(post),
+        isShared(post),
+        sharesCount(post)
+      ]);
+    })
+  );
 }
