@@ -7,4 +7,5 @@ module.exports = {
   EventsController: require("./events.js"),
   LikesController : require('./likes.js'),
   NotificationsController : require('./notifications.js'),
+  DashboardController : require('./dashboard.js')
 };
