@@ -52,4 +52,8 @@ Router.get(
   EventsController.toggleEnrollment
 );
 
+Router.get("/:id", AuthMiddleware, EventsController.showEvent);
+
+Router.get("/:id/posts", AuthMiddleware, PostsController.getPostByEvent);
+
 module.exports = Router;

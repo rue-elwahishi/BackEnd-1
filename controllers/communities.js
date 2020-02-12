@@ -10,3 +10,13 @@ module.exports.getCommunities = async (req, res) => {
 };
 module.exports.valid = async (req, res) =>
   res.json({ success: true, community: req.community });
+
+module.exports.deleteCommunity = async (req, res) => {
+  console.log(req.body);
+  try {
+    Community.findByIdAndDelete({ id: req.params.id });
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, err });
+  }
+};
