@@ -20,3 +20,34 @@ module.exports.deleteCommunity = async (req, res) => {
     res.json({ success: false, err });
   }
 };
+
+//  @desc Get Update Item
+//  @route GET /api/v1/Item/id
+//  @access Public
+
+exports.updateCommunity = async (req, res, next) => {
+  try {
+    const community = await Community.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+    if (!community) {
+      res.status(400).json({
+        success: true
+      });
+    }
+    res.status(201).json({
+      success: true,
+      data: community
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+};

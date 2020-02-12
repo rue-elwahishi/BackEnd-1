@@ -11,8 +11,14 @@ Router.route("/check").get(
   CommunityMiddleware,
   CommunititesController.valid
 );
-Router.route("/:id").delete(
-  AuthMiddleware,
-  CommunityMiddleware,
-  CommunititesController.deleteCommunity
-);
+Router.route("/:id")
+  .put(
+    AuthMiddleware,
+    CommunityMiddleware,
+    CommunititesController.updateCommunity
+  )
+  .delete(
+    AuthMiddleware,
+    CommunityMiddleware,
+    CommunititesController.deleteCommunity
+  );
