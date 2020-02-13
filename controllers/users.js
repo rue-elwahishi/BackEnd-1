@@ -4,18 +4,40 @@ const { User, Following, Like, Post } = require("../models/index.js");
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../helpers/index.js");
-const { userFeatures } = require("../helpers/userFeatures.js");
+const { userFeatures, SendMailVerification } = require("../helpers/index.js");
 
 module.exports.recommendations = async (req, res) => {
   try {
-    
-    let posts = await Like.aggregate().match({user : req.user._id, post : {$ne : null}}).project({_id : '$post'})
-    let postsByCommunity = await Post.aggregate().match({$and : [{$or :posts.length? posts: [{_id : null}]} , {community : req.community._id}]}).project({post : "$_id", _id : false})
-    let following = await Following.aggregate().match({follower : req.user._id, community : req.community._id}).project({user : '$followed', _id : false})
-    let recommendations = await Like.aggregate().match({$and : [{$or:postsByCommunity.length? postsByCommunity: [{_id : null}] }, {user : {$ne : req.user._id}}, following.length?{$nor : following}: {}]}).group({ _id: "$user", posts: { $push: "$post" }}).sort({posts : 1})
-    let users = await User.populate(recommendations, {path : '_id', options: {lean : true}})
-    users = users.map(one => one._id)
-    await userFeatures(users, req.community, req.user)
+    let posts = await Like.aggregate()
+      .match({ user: req.user._id, post: { $ne: null } })
+      .project({ _id: "$post" });
+    let postsByCommunity = await Post.aggregate()
+      .match({
+        $and: [
+          { $or: posts.length ? posts : [{ _id: null }] },
+          { community: req.community._id }
+        ]
+      })
+      .project({ post: "$_id", _id: false });
+    let following = await Following.aggregate()
+      .match({ follower: req.user._id, community: req.community._id })
+      .project({ user: "$followed", _id: false });
+    let recommendations = await Like.aggregate()
+      .match({
+        $and: [
+          { $or: postsByCommunity.length ? postsByCommunity : [{ _id: null }] },
+          { user: { $ne: req.user._id } },
+          following.length ? { $nor: following } : {}
+        ]
+      })
+      .group({ _id: "$user", posts: { $push: "$post" } })
+      .sort({ posts: 1 });
+    let users = await User.populate(recommendations, {
+      path: "_id",
+      options: { lean: true }
+    });
+    users = users.map(one => one._id);
+    await userFeatures(users, req.community, req.user);
     res.json(users);
   } catch (err) {
     res.json({ success: false, message: err.message });
@@ -23,7 +45,9 @@ module.exports.recommendations = async (req, res) => {
 };
 
 module.exports.signUp = async (req, res, next) => {
+  console.log(req.body);
   try {
+    var key = Math.ceil(Math.random() * 1000000);
     if (await User.findOne({ username: req.body.username }))
       return res.json({ success: false, msg: "username exists" });
     if (!req.body.password || req.body.password.length < 8)
@@ -39,9 +63,13 @@ module.exports.signUp = async (req, res, next) => {
       lastname: req.body.lastname,
       email: req.body.email,
       username: req.body.username,
-      password: await bcrypt.hash(req.body.password, 10)
+      password: await bcrypt.hash(req.body.password, 10),
+      key: key
     });
-    await newUser.save();
+
+    let user = await newUser.save();
+    console.log(user);
+    SendMailVerification(user.email, key);
     next();
   } catch (err) {
     res.json({ success: false, msg: `something went wrong : ${err}` });
@@ -85,7 +113,9 @@ module.exports.verifyToken = async (req, res) => {
 module.exports.getUser = async (req, res) => {
   try {
     var user = await User.findOne({ username: req.params.username }).lean();
+    console.log(user);
     await userFeatures([user], req.community, req.user);
+
     res.json({ success: true, result: user });
   } catch (err) {
     res.json({ success: false, err, msg: "failed to fetch user" });
@@ -111,7 +141,6 @@ module.exports.updateUser = async (req, res) => {
       let file;
       if (req.file.mimetype.match(/jpg|jpeg|png/i)) {
         file = await cloudinary.v2.uploader.upload(req.file.path);
-        req.body.file = file.url;
       }
     } else req.body.file = req.user.file;
     var data = {
@@ -140,7 +169,14 @@ module.exports.updateUser = async (req, res) => {
       }
     }
     var result = await User.findByIdAndUpdate(req.user._id, {
-      $set: data
+      $set: {
+        bio: req.body.bio,
+        firstname: req.body.firstname,
+        lastname: req.body.firstname,
+        password: await bcrypt.hash(req.body.password, 10),
+        email: req.body.email,
+        file: req.body.file
+      }
     });
 
     res.json({ success: true, msg: "settings updated", result });
@@ -168,4 +204,29 @@ module.exports.search = (req, res) => {
     .catch(err => {
       res.json({ success: false, err });
     });
+};
+
+module.exports.comparingKeys = async (req, res) => {
+  try {
+    var keyExists = await User.exists({ key: req.body.key, _id: req.user._id });
+    if (keyExists) {
+      await User.findByIdAndUpdate(req.user._id, {
+        isVerified: true,
+        key: null
+      });
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, msg: "not verified" });
+    }
+  } catch (err) {
+    res.json({ success: false, msg: err.message });
+  }
+};
+module.exports.deleteUser = async (req, res) => {
+  try {
+    var result = await User.findByIdAndDelete(req.user._id);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.json({ success: false, err: err.msg });
+  }
 };

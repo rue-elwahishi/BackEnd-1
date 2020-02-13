@@ -42,10 +42,15 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  facebook : String,
-  twitter : String,
-  linkedIn : String,
-  instagram:String
+  facebook: String,
+  twitter: String,
+  linkedIn: String,
+  instagram: String,
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  key: Number
 });
 
 module.exports = mongoose.model("user", UserSchema);

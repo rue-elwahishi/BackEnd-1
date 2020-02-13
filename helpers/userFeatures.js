@@ -12,7 +12,6 @@ module.exports.userFeatures = async (users, community, you) => {
     });
   }
   async function followingsCount(user) {
-    console.log(user);
     user.followingsCount = await Following.count({
       follower: user._id,
       community: community._id
