@@ -9,16 +9,10 @@ const {
   AdminMiddlware
 } = require("../../helpers/index.js");
 
-Router.route("/posts").get(
-  AuthMiddleware,
-  AdminMiddlware,
-  DashboardController.getPosts
-);
-Router.route("/events").get(
-  AuthMiddleware,
-  AdminMiddlware,
-  DashboardController.getEvents
-);
+Router.route('/posts').get(AuthMiddleware, AdminMiddlware, DashboardController.getPosts)
+Router.route('/events').get(AuthMiddleware, AdminMiddlware, DashboardController.getEvents)
+Router.route('/users').get(AuthMiddleware,AdminMiddlware,DashboardController.usersCount)
+
 Router.route("/createCommunity").post(
   AuthMiddleware,
   AdminMiddlware,

@@ -1,4 +1,4 @@
-const { Post, Community, Event } = require("../models/index.js");
+const { Post, Community, Event, User } = require("../models/index.js");
 
 module.exports.getPosts = async (req, res) => {
   try {
@@ -34,6 +34,28 @@ module.exports.getEvents = async (req, res) => {
   }
 };
 
+module.exports.usersCount = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      result: await User.aggregate().project({
+        _id: {
+          $dateFromParts: {
+            year: { $year: "$_id" },
+            month: { $month: "$_id" },
+            day: { $dayOfMonth: "$_id" }
+          }
+        }
+      }).group({
+        _id : "$_id",
+        users : {$sum : 1}
+
+      }).sort({_id : 1})
+    });
+  } catch (err) {
+    res.json({ success: false, msg: err.message });
+  }
+}
 module.exports.createCommunity = async (req, res) => {
   try {
     const community = await Community.findOne({ name: req.body.name });
@@ -82,5 +104,14 @@ module.exports.getCommunities = async (req, res) => {
     res.json({ success: true, result: await Community.find({}) });
   } catch (err) {
     res.json({ success: false, msg: "something went wrong", err });
-  }
+  
 };
+}
+
+// _id: {
+//   $dateFromParts: {
+//     year: { $year: "$_id" },
+//     month: { $month: "$_id" },
+//     day: { $dayOfMonth: "$_id" }
+//   }
+// 

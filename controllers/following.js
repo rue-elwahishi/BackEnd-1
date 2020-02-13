@@ -1,5 +1,6 @@
 const { Following } = require("../models/index.js");
 const { userFeatures } = require("../helpers/userFeatures.js");
+const { NotificationHandler } = require('../helpers/index.js')
 
 module.exports.follow = async (req, res) => {
   try {
@@ -13,13 +14,24 @@ module.exports.follow = async (req, res) => {
       community: req.community._id
     });
     if (!alreadyFollowing) {
-      await Following.create({
-        follower: user,
-        followed: friend,
+      let notifier = {
+        sender : user,
+        receiver : friend,
+        type: "follow",
         community: req.community._id
-      });
+       }
+       await Promise.all([
+        Following.create({
+           follower: user,
+           followed: friend,
+           community: req.community._id
+         }),
+         NotificationHandler.push(notifier),
+
+
+       ])
       res.json({ success: true });
-    } else return;
+    } else return res.json({success:false, msg : 'already followin him'});
   } catch (err) {
     res.json({ success: false, msg: "following failed" });
   }
@@ -28,11 +40,21 @@ module.exports.unfollow = async (req, res) => {
   try {
     const user = req.user._id;
     const unfollowed = req.params.id;
-    await Following.findOneAndDelete({
+    var found = await Following.findOneAndDelete({
       follower: user,
       followed: unfollowed,
       community: req.community._id
     });
+    if(found){
+      let notifier = {
+        sender : user,
+        receiver : unfollowed,
+        type: "follow",
+        community: req.community._id
+       }
+      await NotificationHandler.remove(notifier)
+
+    }
     res.json({ success: true });
   } catch (err) {
     res.json({ success: false, msg: "unfollowing failed", err });
@@ -78,5 +100,24 @@ module.exports.getFollowers = async (req, res) => {
     console.log(result);
   } catch (err) {
     res.json({ success: false });
+  }
+};
+
+module.exports.getFriends = async (req, res) => {
+  try {
+    let result = await Following.aggregate().match({
+      follower : req.user._id,
+      community: req.community._id
+    }).project({follower : "$followed", _id: false})
+    result = await Following.find({$and : [{
+      followed : req.user._id,
+      community: req.community._id
+    } , {$or : result.length? result : [{_id : null}]}]})
+
+      .populate("follower")
+      .lean();
+    res.json({ success: true, result });
+  } catch (err) {
+    res.json({ success: false, msg: "failed to fetch", err:err.message });
   }
 };
