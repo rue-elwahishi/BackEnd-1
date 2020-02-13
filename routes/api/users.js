@@ -15,6 +15,7 @@ const {
 
 Router.get('/recommendations' , AuthMiddleware, CommunityMiddleware, UsersController.recommendations)
 Router.post("/register", UsersController.signUp, UsersController.logIn);
+Router.get("/profile", AuthMiddleware, UsersController.getProfile);
 Router.post("/authenticate", UsersController.logIn);
 Router.get("/verify", UsersController.verifyToken);
 Router.get(
@@ -25,6 +26,12 @@ Router.get(
 );
 Router.get("/search", AuthMiddleware, UsersController.search);
 
+Router.get(
+  "/friends",
+  AuthMiddleware,
+  CommunityMiddleware,
+  FollowingsController.getFriends
+);
 Router.get(
   "/:username",
   AuthMiddleware,

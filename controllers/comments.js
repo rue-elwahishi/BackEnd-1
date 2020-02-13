@@ -1,7 +1,8 @@
 
 const commentSchema = require("../models/comment");
 
-const {Comment, User, Like} = require("../models/index.js");
+const {Comment, User, Like,Post} = require("../models/index.js");
+const {NotificationHandler} = require('../helpers/index.js')
 
 
 //create new comment
@@ -15,8 +16,19 @@ module.exports.createComment = async (req, res) => {
     });
     let result = await comment.save();
     result.user = await User.findById(result.user)
+        let notifier = {
+          sender : req.user._id,
+          receiver : (await Post.findById(req.params.id).distinct("user"))[0],
+          post: req.params.id,
+          type: "comment",
+          comment:result,
+          community: req.community._id
+         }
+    await NotificationHandler.push(notifier),
+
     res.json({ success: true, result });
   } catch (err) {
+    console.log(err)
     res.json({ success: false, err });
   }
 };

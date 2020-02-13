@@ -4,7 +4,8 @@ const {
   UsersController,
   PostsController,
   EventsController,
-  LikesController
+  LikesController,
+  NotificationsController
 } = require("../../controllers/index");
 const {
   CommunityMiddleware,
@@ -21,6 +22,9 @@ Router.post(
   uploadMiddleware.single("file"),
   EventsController.makeEvent
 );
+
+Router.route('/:id/invite').post(AuthMiddleware, CommunityMiddleware, NotificationsController.invite)
+
 Router.post(
   "/:id/posts",
   AuthMiddleware,
@@ -34,7 +38,7 @@ Router.get(
   PostsController.getPostsByEvent
 );
 
-Router.get(
+Router.post(
   "/nearby",
   AuthMiddleware,
   CommunityMiddleware,

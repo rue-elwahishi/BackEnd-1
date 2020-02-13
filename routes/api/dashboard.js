@@ -4,4 +4,5 @@ const {AuthMiddleware, CommunityMiddleware, AdminMiddlware} = require('../../hel
 
 Router.route('/posts').get(AuthMiddleware, AdminMiddlware, DashboardController.getPosts)
 Router.route('/events').get(AuthMiddleware, AdminMiddlware, DashboardController.getEvents)
+Router.route('/users').get(AuthMiddleware,AdminMiddlware,DashboardController.usersCount)
 

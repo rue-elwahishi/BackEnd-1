@@ -1,6 +1,7 @@
-const { Post, Following, Like, Comment } = require("../models/index.js");
+const { Post, Following, Like, Comment,User } = require("../models/index.js");
 const {commentFeatures} = require('./comments.js')
 const { cloudinary } = require("../helpers/index.js");
+const {NotificationHandler} = require('../helpers/index.js')
 
 module.exports.createPost = async (req, res) => {
   try {
@@ -22,12 +23,39 @@ module.exports.createPost = async (req, res) => {
       file: req.body.file
     });
 
-    const result = await post.save();
-    res.json({ success: true, result });
+    let result = await post.save();
+    result = (await User.populate(result, {path : 'user'})).toObject()
+    await postFeatures([result], req.user)
+    res.json({ success: true, result  });
   } catch (err) {
-    res.json({ success: false, err });
+    res.json({ success: false, err:err.message });
   }
 };
+
+module.exports.remove = async (req,res)=>{
+  try{
+    let notifier;
+    var post = await Post.findById(req.params.id)
+    if(req.user._id.toString() !=  post.user.toString()) return res.json({success : false})
+    post.deactivated = true
+    if(post.sharedpost){
+      notifier = {
+        sender : req.user._id,
+        receiver : (await Post.findById(post.sharedpost).distinct("user"))[0],
+        post: post.sharedpost,
+        type: "share",
+        community: req.community._id
+       }
+    }
+    await Promise.all([
+      post.save(),
+      NotificationHandler.remove(notifier)
+    ])
+    res.json({success : true})
+  }catch (err) {
+    res.json({ success: false, err:err.message });
+  }
+}
 
 module.exports.createEventPost = async (req, res) => {
   try {
@@ -48,15 +76,27 @@ module.exports.createEventPost = async (req, res) => {
       event: req.params.id,
       file: req.body.file
     });
-
-    const result = await post.save();
-    res.json({ success: true, result });
+    
+    let result = await post.save();
+    result = (await User.populate(result, {path : 'user'})).toObject()
+    await postFeatures([result], req.user)
+    res.json({ success: true, result  });
   } catch (err) {
     res.json({ success: false, err });
   }
 };
 
 module.exports.sharePost = async (req, res) => {
+
+  let notifier = {
+    sender : req.user._id,
+    receiver : (await Post.findById(req.params.id).distinct("user"))[0],
+    post: req.params.id,
+    type: "share",
+    community: req.community._id
+   }
+
+
   try {
     var post = new Post({
       content: req.body.content,
@@ -65,10 +105,15 @@ module.exports.sharePost = async (req, res) => {
       sharedpost: req.params.id
     });
 
-    const result = await post.save();
+    let result = await post.save();
+    result = await Post.findById(result._id)
+    .populate(["user", { path: "sharedpost", populate: { path: "user" } }])
+    .lean();
+    await NotificationHandler.push(notifier),
+
     res.json({ success: true, result });
   } catch (err) {
-    res.json({ success: false, err });
+    res.json({ success: false, err:err.message });
   }
 };
 
@@ -88,9 +133,11 @@ module.exports.getPosts = async (req, res, next) => {
     mapped.push({ user: userId });
     let posts = mapped.length
       ? await Post.find({
-          $and: [{ $or: mapped }, { community: communityId }]
+          $and: [{ $or: mapped }, { community: communityId, deactivated: false }]
         })
           .sort({ _id: -1 })
+          .limit(20)
+          .skip(Number(req.query.page || 0))
           .lean()
           .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
       : [];
@@ -107,7 +154,7 @@ module.exports.getPosts = async (req, res, next) => {
 
 module.exports.getPost = async (req, res, next) => {
   try {
-    let post = await Post.findById(req.params.id)
+    let post = await Post.findOne({_id : req.params.id, deactivated:false})
           .lean()
           .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
     post.comments = await Comment.find({ post: post._id }).sort({_id : -1}).populate('user')
@@ -128,7 +175,8 @@ module.exports.getPostsByUserId = async (req, res, next) => {
   try {
     let posts = await Post.find({
       user: req.params.id,
-      community: req.community._id
+      community: req.community._id,
+      deactivated: false
     }).sort({ _id: -1 })
     .lean()
     .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
@@ -181,44 +229,8 @@ module.exports.getPostsByEvent = async (req, res, next) => {
   }
 };
 
-module.exports.getPostByUserInHobby = async (req, res, next) => {
-  try {
-    let user = req.user;
-    let hobby = req.community;
-    const posts = await Post.find({ user, community })
-      .populate("User")
-      .populate("Hobby")
-      .exec((err, posts) => console.log(posts));
-    res.status(200).json({
-      success: false,
-      msg: err.message
-    });
-  } catch {
-    res.status(400).json({
-      success: false,
-      msg: err.message
-    });
-  }
-};
-//
-module.exports.getPostByUserInEvent = async (req, res, next) => {
-  // try {
-  //   let user = req.params._user;
-  //   let event = req.params._event;
-  //   const posts = await Post.find({ user: user, event: event })
-  //     // .populate(["User"])
-  //     .exec((err, posts) => console.log(posts));
-  //   res.status(200).json({
-  //     success: false,
-  //     msg: err.message
-  //   });
-  // } catch {
-  //   res.status(400).json({
-  //     success: false,
-  //     msg: err.message
-  //   });
-  // }
-};
+
+
 
 async function postFeatures(posts, user) {
   async function commentsCount(post) {
@@ -231,10 +243,10 @@ async function postFeatures(posts, user) {
     post.isLiked = await Like.exists({ post: post._id, user: user._id });
   }
   async function isShared(post){
-    post.isShared = await Post.exists({user:user._id, sharedpost : post._id })
+    post.isShared = await Post.exists({user:user._id, sharedpost : post._id, deactivated : false })
   }
   async function sharesCount(post){
-    post.sharesCount = await Post.count({sharedpost : post._id })
+    post.sharesCount = await Post.count({sharedpost : post._id, deactivated : false })
   }
   await Promise.all(posts.map(post => {
     return Promise.all([

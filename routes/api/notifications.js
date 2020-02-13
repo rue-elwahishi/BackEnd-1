@@ -3,3 +3,4 @@ const {NotificationsController} = require('../../controllers/index.js')
 const {AuthMiddleware, CommunityMiddleware} = require('../../helpers/index.js')
 
 Router.route('/').get(AuthMiddleware, CommunityMiddleware, NotificationsController.get)
+Router.route('/seen').get(AuthMiddleware, CommunityMiddleware, NotificationsController.seen)
