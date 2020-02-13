@@ -76,6 +76,7 @@ module.exports.signUp = async (req, res, next) => {
   }
 };
 module.exports.logIn = async (req, res, next) => {
+  console.log(req.body);
   try {
     const username = req.body.username;
     const password = req.body.password;

@@ -28,11 +28,7 @@ Router.post(
   PostsController.createEventPost
 );
 
-Router.get(
-  "/:id/posts",
-  AuthMiddleware,
-  PostsController.getPostsByEvent
-);
+Router.get("/:id/posts", AuthMiddleware, PostsController.getPostsByEvent);
 
 Router.get(
   "/nearby",
@@ -40,14 +36,21 @@ Router.get(
   CommunityMiddleware,
   EventsController.nearby
 );
-Router.get("/", AuthMiddleware, CommunityMiddleware, EventsController.showEvents);
+Router.get(
+  "/",
+  AuthMiddleware,
+  CommunityMiddleware,
+  EventsController.showEvents
+);
 
 Router.get("/:id", AuthMiddleware, EventsController.showEvent);
 Router.get("/:id/like", AuthMiddleware, LikesController.likeEvent);
 Router.get("/:id/dislike", AuthMiddleware, LikesController.dislikeEvent);
-Router.get('/:id/enrollment' , AuthMiddleware, EventsController.toggleEnrollment)
-
-
+Router.get(
+  "/:id/enrollment",
+  AuthMiddleware,
+  EventsController.toggleEnrollment
+);
 
 Router.get("/:id", AuthMiddleware, EventsController.showEvent);
 
