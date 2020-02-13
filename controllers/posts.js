@@ -119,6 +119,7 @@ module.exports.sharePost = async (req, res) => {
 
 // using for new users that didn't choose their interrest
 module.exports.getPosts = async (req, res, next) => {
+  console.log(req.body);
   try {
     const userId = req.user._id;
     const communityId = req.community._id;
@@ -139,7 +140,10 @@ module.exports.getPosts = async (req, res, next) => {
           .limit(20)
           .skip(Number(req.query.page || 0))
           .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
+          .populate([
+            "user",
+            { path: "sharedpost", populate: { path: "user" } }
+          ])
       : [];
     await postFeatures(posts, req.user);
     res.json({ posts });
@@ -150,7 +154,6 @@ module.exports.getPosts = async (req, res, next) => {
     });
   }
 };
-
 
 module.exports.getPost = async (req, res, next) => {
   try {
@@ -208,19 +211,15 @@ module.exports.getPostByEvent = async (req, res, next) => {
 };
 //
 
-
-
-
 module.exports.getPostsByEvent = async (req, res, next) => {
-
   try {
     const posts = await Post.find({ event: req.params.id })
-          .sort({ _id: -1 })
-          .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-      
+      .sort({ _id: -1 })
+      .lean()
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+
     await postFeatures(posts, req.user);
-    res.json({ success : true , result : posts });
+    res.json({ success: true, result: posts });
   } catch (err) {
     res.json({
       success: false,
@@ -248,14 +247,15 @@ async function postFeatures(posts, user) {
   async function sharesCount(post){
     post.sharesCount = await Post.count({sharedpost : post._id, deactivated : false })
   }
-  await Promise.all(posts.map(post => {
-    return Promise.all([
-          commentsCount(post),
-          likesCount(post),
-          isLiked(post),
-          isShared(post),
-          sharesCount(post)
-        ])
-  }))
-
+  await Promise.all(
+    posts.map(post => {
+      return Promise.all([
+        commentsCount(post),
+        likesCount(post),
+        isLiked(post),
+        isShared(post),
+        sharesCount(post)
+      ]);
+    })
+  );
 }

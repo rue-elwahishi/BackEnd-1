@@ -5,5 +5,6 @@ module.exports = {
   cloudinary: require("./cloudinary.js"),
   UserFeatures: require("./userFeatures.js"),
   AdminMiddlware: require('./adminMiddleware'),
-  NotificationHandler : require('./notificationHandler.js')
+  NotificationHandler : require('./notificationHandler.js'),
+  SendMailVerification: require("./sendMailVerification")
 };

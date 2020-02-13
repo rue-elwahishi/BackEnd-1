@@ -16,7 +16,7 @@ module.exports.createPost = async (req, res) => {
     res.json({ success: false, err });
   }
 };
-// using for new users that didn't choose their interrest
+// using for new users that didn't choose their interest
 module.exports.getPosts = async (req, res, next) => {
   try {
     const posts = await Post.find();

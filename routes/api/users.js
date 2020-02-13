@@ -13,7 +13,12 @@ const {
 
 // Register
 
-Router.get('/recommendations' , AuthMiddleware, CommunityMiddleware, UsersController.recommendations)
+Router.get(
+  "/recommendations",
+  AuthMiddleware,
+  CommunityMiddleware,
+  UsersController.recommendations
+);
 Router.post("/register", UsersController.signUp, UsersController.logIn);
 Router.get("/profile", AuthMiddleware, UsersController.getProfile);
 Router.post("/authenticate", UsersController.logIn);
@@ -25,6 +30,7 @@ Router.get(
   PostsController.getPostsByUserId
 );
 Router.get("/search", AuthMiddleware, UsersController.search);
+Router.post("/insertkey", AuthMiddleware, UsersController.comparingKeys);
 
 Router.get(
   "/friends",
@@ -69,5 +75,4 @@ Router.patch(
   uploadMiddleware.single("file"),
   UsersController.updateUser
 );
-
 module.exports = Router;
