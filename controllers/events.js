@@ -11,8 +11,9 @@ module.exports.makeEvent = async (req,res)=>{
         }
         req.body.community = req.community._id
         req.body.location =  JSON.parse(req.body.location)
-        
-        res.json({ success: true, result: await Event.create(req.body)});
+        let event = (await Event.create(req.body)).toObject()
+        await eventFeatures([event], req.user)
+        res.json({ success: true, result:event });
       } catch (err) {
         res.json({ success: false, err });
   }
@@ -21,6 +22,7 @@ module.exports.makeEvent = async (req,res)=>{
 module.exports.showEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id).lean();
+    console.log(event)
     await eventFeatures([event] , req.user)
     res.json({
       success: true,
@@ -52,42 +54,31 @@ module.exports.showEvents = async (req, res, next) => {
   }
 };
 
-module.exports.showEvent = async (req, res, next) => {
-  try {
-    const event = await Event.findById(req.params.id);
-    res.json({
-      success: true,
-      result: event
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: "failed to retrieve event",
-      err
-    });
-  }
-};
+
 
 module.exports.nearby = async (req, res) => {
   try {
+    console.log(req.body.coordinates)
     let result = await Event.aggregate([
       {
         $geoNear: {
           near: {
             type: "Point",
-            coordinates: [36.77429914811174, 10.19528999023441]
+            coordinates: req.body.coordinates
           },
           distanceField: "dist.calculated",
-          maxDistance: 2,
+          // maxDistance: 1340000,
           includeLocs: "dist.location",
           spherical: true
         }
       },
-      { $match: { community: req.community._id } }
+      { $match: { community: req.community._id, end: {$gte: new Date() } } },
+      { $sort: { "distance": 1 } },
+
     ]);
     res.json({ success: true, result });
   } catch (err) {
-    res.json({ success: false, msg: "not working", err });
+    res.json({ success: false, msg: "not working", err: err.message });
   }
 };
 

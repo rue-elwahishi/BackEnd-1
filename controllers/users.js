@@ -121,6 +121,13 @@ module.exports.getUser = async (req, res) => {
     res.json({ success: false, err, msg: "failed to fetch user" });
   }
 };
+module.exports.getProfile = (req, res) => {
+  try {
+    res.json({ success: true, result: req.user });
+  } catch (err) {
+    res.json({ success: false, err, msg: "failed to fetch user" });
+  }
+};
 
 module.exports.updateUser = async (req, res) => {
   try {
