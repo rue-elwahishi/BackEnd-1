@@ -4,7 +4,7 @@ const { User, Following, Like, Post } = require("../models/index.js");
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../helpers/index.js");
-const { userFeatures } = require("../helpers/userFeatures.js");
+const { userFeatures, SendMailVerification } = require("../helpers/index.js");
 
 module.exports.recommendations = async (req, res) => {
   try {
@@ -47,6 +47,7 @@ module.exports.recommendations = async (req, res) => {
 module.exports.signUp = async (req, res, next) => {
   console.log(req.body);
   try {
+    var key = Math.ceil(Math.random() * 1000000);
     if (await User.findOne({ username: req.body.username }))
       return res.json({ success: false, msg: "username exists" });
     if (!req.body.password || req.body.password.length < 8)
@@ -62,10 +63,14 @@ module.exports.signUp = async (req, res, next) => {
       lastname: req.body.lastname,
       email: req.body.email,
       username: req.body.username,
-      password: await bcrypt.hash(req.body.password, 10)
+      password: await bcrypt.hash(req.body.password, 10),
+      key: key
     });
-    await newUser.save();
-    res.json({ success: true, msg: "you've signed up successfully" });
+
+    let user = await newUser.save();
+    console.log(user);
+    SendMailVerification(user.email, key);
+    next();
   } catch (err) {
     res.json({ success: false, msg: `something went wrong : ${err}` });
   }
@@ -198,4 +203,29 @@ module.exports.search = (req, res) => {
     .catch(err => {
       res.json({ success: false, err });
     });
+};
+
+module.exports.comparingKeys = async (req, res) => {
+  try {
+    var keyExists = await User.exists({ key: req.body.key, _id: req.user._id });
+    if (keyExists) {
+      await User.findByIdAndUpdate(req.user._id, {
+        isVerified: true,
+        key: null
+      });
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, msg: "not verified" });
+    }
+  } catch (err) {
+    res.json({ success: false, msg: err.message });
+  }
+};
+module.exports.deleteUser = async (req, res) => {
+  try {
+    var result = await User.findByIdAndDelete(req.user._id);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.json({ success: false, err: err.msg });
+  }
 };

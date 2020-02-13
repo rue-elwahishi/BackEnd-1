@@ -4,5 +4,6 @@ module.exports = {
   uploadMiddleware: require("./uploadMiddleware"),
   cloudinary: require("./cloudinary.js"),
   UserFeatures: require("./userFeatures.js"),
-  AdminMiddlware: require('./adminMiddleware')
+  AdminMiddlware: require("./adminMiddleware"),
+  SendMailVerification: require("./sendMailVerification")
 };
