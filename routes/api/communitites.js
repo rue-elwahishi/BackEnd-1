@@ -11,3 +11,4 @@ Router.route("/check").get(
   CommunityMiddleware,
   CommunititesController.valid
 );
+
