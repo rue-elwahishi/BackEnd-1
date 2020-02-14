@@ -1,6 +1,6 @@
 const Following = require("../models/following.js");
 
-module.exports.userFeatures = async (users, community, you) => {
+module.exports = async (users, community, you) => {
   function isYou(user) {
     return user.username === you.username;
   }
