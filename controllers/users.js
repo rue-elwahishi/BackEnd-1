@@ -45,7 +45,6 @@ module.exports.recommendations = async (req, res) => {
 };
 
 module.exports.signUp = async (req, res, next) => {
-  console.log(req.body);
   try {
     var key = Math.ceil(Math.random() * 1000000);
     if (await User.findOne({ username: req.body.username }))
@@ -68,8 +67,8 @@ module.exports.signUp = async (req, res, next) => {
     });
 
     let user = await newUser.save();
-    console.log(user);
-    SendMailVerification(user.email, key);
+
+    SendMailVerification(user.email, user.firstname, key);
     next();
   } catch (err) {
     res.json({ success: false, msg: `something went wrong : ${err}` });
