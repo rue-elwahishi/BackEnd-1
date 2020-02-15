@@ -1,6 +1,5 @@
 const { Following } = require("../models/index.js");
-const { userFeatures } = require("../helpers/userFeatures.js");
-const { NotificationHandler } = require('../helpers/index.js')
+const { NotificationHandler, UserFeatures } = require('../helpers/index.js')
 
 module.exports.follow = async (req, res) => {
   try {
@@ -70,14 +69,14 @@ module.exports.getFollowings = async (req, res) => {
     })
       .populate("followed")
       .lean();
-    await userFeatures(
+    await UserFeatures(
       result.map(following => following.followed),
       req.community,
       req.user
     );
-    res.json({ success: true, msg: "got all following", result });
+    res.json({ success: true, result });
   } catch (err) {
-    res.json({ success: false, msg: "failed to fetch" });
+    res.json({ success: false, msg: "failed to fetch", err : err.message });
   }
 };
 module.exports.getFollowers = async (req, res) => {
@@ -90,16 +89,16 @@ module.exports.getFollowers = async (req, res) => {
     })
       .populate("follower")
       .lean();
-    await userFeatures(
+    await UserFeatures(
       result.map(followings => followings.follower),
       req.community,
       req.user
     );
 
-    res.json({ success: true, msg: "got all followers", result });
+    res.json({ success: true, result});
     console.log(result);
   } catch (err) {
-    res.json({ success: false });
+    res.json({ success: false, err : err.message });
   }
 };
 

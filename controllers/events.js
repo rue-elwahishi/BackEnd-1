@@ -38,7 +38,7 @@ module.exports.showEvent = async (req, res, next) => {
 };
 module.exports.showEvents = async (req, res, next) => {
   try {
-    const events = await Event.find({community: req.community._id}).sort({_id : -1}).lean();
+    const events = await Event.find({community: req.community._id, end: {$gte: new Date() }}).sort({start : -1}).lean();
     await eventFeatures(events , req.user)
 
     res.json({
@@ -59,7 +59,7 @@ module.exports.showEvents = async (req, res, next) => {
 module.exports.nearby = async (req, res) => {
   try {
     console.log(req.body.coordinates)
-    let result = await Event.aggregate([
+    let result = (await Event.aggregate([
       {
         $geoNear: {
           near: {
@@ -75,7 +75,8 @@ module.exports.nearby = async (req, res) => {
       { $match: { community: req.community._id, end: {$gte: new Date() } } },
       { $sort: { "distance": 1 } },
 
-    ]);
+    ]))
+    await eventFeatures(result , req.user)
     res.json({ success: true, result });
   } catch (err) {
     res.json({ success: false, msg: "not working", err: err.message });

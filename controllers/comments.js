@@ -54,7 +54,7 @@ module.exports.createReply = async (req, res) => {
 //display comment
 module.exports.displayAll = async (req, res) => {
   try {
-    var comments = await Comment.find({ post: req.params.id })
+    var comments = await Comment.find({ post: req.params.id, deactivated: false })
       .limit(10)
       .populate('user')
       .sort({_id : -1})
@@ -96,14 +96,31 @@ module.exports.updateComment = (req, res) => {
 };
 
 //delete comment
-module.exports.deleteComment = (req, res) => {
-  try {
-    Comment.deleteOne({ id: req.params.id });
-    res.json({ success: true });
-  } catch (err) {
-    res.json({ success: false, err });
+module.exports.remove = async (req,res)=>{
+  try{
+    
+    let comment = await Comment.findById(req.params.id)
+    if(req.user._id.toString() !=  comment.user.toString()) return res.json({success : false})
+    comment.deactivated = true
+     let notifier = {
+      sender : req.user._id,
+      receiver : (await Post.findById(comment.post).distinct("user"))[0],
+      post: comment.post,
+      type: "comment",
+      comment:comment._id,
+      community: req.community._id
+     }
+    
+    await Promise.all([
+      comment.save(),
+      NotificationHandler.remove(notifier)
+    ])
+    res.json({success : true})
+  }catch (err) {
+    res.json({ success: false, err:err.message });
   }
-};
+}
+
 
 
 var commentFeatures = module.exports.commentFeatures = async (comments, user)=> {

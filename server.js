@@ -4,7 +4,7 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const passport = require("passport");
 
-// const {Community} = require("./models/index.js")
+// const {User} = require("./models/index.js")
 const app = express();
 const path = require("path");
 const {
@@ -26,6 +26,7 @@ dotenv.config({
 connectDB();
 // CORS middleware,on
 app.use(cors());
+// User.updateMany({isVerified : true})
 // Body parser
 // Community.create({name: "BeatBox"})
 app.use(express.json());

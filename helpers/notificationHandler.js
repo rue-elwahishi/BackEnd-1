@@ -32,7 +32,6 @@ module.exports.remove = async ({
   comment,
   reply
 }) => {
-  if (sender.toString() != receiver.toString()) {
     await Notification.findOneAndDelete({
       sender,
       receiver,
@@ -43,5 +42,5 @@ module.exports.remove = async ({
       comment,
       reply
     });
-  }
+  
 };
