@@ -109,7 +109,11 @@ module.exports.sharePost = async (req, res) => {
     result = await Post.findById(result._id)
     .populate(["user", { path: "sharedpost", populate: { path: "user" } }])
     .lean();
-    await NotificationHandler.push(notifier),
+    await Promise.all([
+       postFeatures([result], req.user),
+       NotificationHandler.push(notifier)
+
+    ])
 
     res.json({ success: true, result });
   } catch (err) {
@@ -160,7 +164,7 @@ module.exports.getPost = async (req, res, next) => {
     let post = await Post.findOne({_id : req.params.id, deactivated:false})
           .lean()
           .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-    post.comments = await Comment.find({ post: post._id }).sort({_id : -1}).populate('user')
+    post.comments = await Comment.find({ post: post._id,deactivated: false }).sort({_id : -1}).populate('user')
     .limit(5).lean()
     await Promise.all([postFeatures([post], req.user), commentFeatures(post.comments,req.user)])
     
@@ -182,6 +186,8 @@ module.exports.getPostsByUserId = async (req, res, next) => {
       deactivated: false
     }).sort({ _id: -1 })
     .lean()
+    .limit(5)
+    .skip(Number(req.query.page || 0))
     .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
     await postFeatures(posts, req.user)
     res.json({
@@ -233,7 +239,7 @@ module.exports.getPostsByEvent = async (req, res, next) => {
 
 async function postFeatures(posts, user) {
   async function commentsCount(post) {
-    post.commentsCount = await Comment.count({ post: post._id });
+    post.commentsCount = await Comment.count({ post: post._id, deactivated:false });
   }
   async function likesCount(post) {
     post.likesCount = await Like.count({ post: post._id });

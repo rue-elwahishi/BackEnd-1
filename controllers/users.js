@@ -4,7 +4,7 @@ const { User, Following, Like, Post } = require("../models/index.js");
 const config = require("../config/config");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../helpers/index.js");
-const { userFeatures, SendMailVerification } = require("../helpers/index.js");
+const { UserFeatures, SendMailVerification } = require("../helpers/index.js");
 
 module.exports.recommendations = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ module.exports.recommendations = async (req, res) => {
       options: { lean: true }
     });
     users = users.map(one => one._id);
-    await userFeatures(users, req.community, req.user);
+    await UserFeatures(users, req.community, req.user);
     res.json(users);
   } catch (err) {
     res.json({ success: false, message: err.message });
@@ -113,11 +113,11 @@ module.exports.getUser = async (req, res) => {
   try {
     var user = await User.findOne({ username: req.params.username }).lean();
     console.log(user);
-    await userFeatures([user], req.community, req.user);
+    await UserFeatures([user], req.community, req.user);
 
     res.json({ success: true, result: user });
   } catch (err) {
-    res.json({ success: false, err, msg: "failed to fetch user" });
+    res.json({ success: false, err:err.message, msg: "failed to fetch user" });
   }
 };
 module.exports.getProfile = (req, res) => {

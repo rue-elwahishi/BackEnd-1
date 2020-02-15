@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const {CommentsController, LikesController} = require("../../controllers/index");
 const Router = (module.exports = require("express").Router());
-const {AuthMiddleware} = require('../../helpers/index.js')
+const {AuthMiddleware, CommunityMiddleware} = require('../../helpers/index.js')
 
 //save  comment in database
 
@@ -16,3 +16,4 @@ Router.get("/:id/replies",AuthMiddleware, CommentsController.displayReply);
 Router.get('/:id/like' , AuthMiddleware, LikesController.likeComment)
 //delete a comment
 // Router.delete("/comments/:id");
+Router.get('/:id/remove' , AuthMiddleware,CommunityMiddleware, CommentsController.remove)

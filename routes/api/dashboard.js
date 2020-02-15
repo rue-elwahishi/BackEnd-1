@@ -10,6 +10,7 @@ const {
 } = require("../../helpers/index.js");
 
 Router.route('/posts').get(AuthMiddleware, AdminMiddlware, DashboardController.getPosts)
+Router.route('/likes').get(AuthMiddleware, AdminMiddlware, DashboardController.getLikes)
 Router.route('/events').get(AuthMiddleware, AdminMiddlware, DashboardController.getEvents)
 Router.route('/users').get(AuthMiddleware,AdminMiddlware,DashboardController.usersCount)
 
