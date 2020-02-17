@@ -1,7 +1,7 @@
-const { Post, Following, Like, Comment,User } = require("../models/index.js");
-const {commentFeatures} = require('./comments.js')
+const { Post, Following, Like, Comment, User } = require("../models/index.js");
+const { commentFeatures } = require("./comments.js");
 const { cloudinary } = require("../helpers/index.js");
-const {NotificationHandler} = require('../helpers/index.js')
+const { NotificationHandler } = require("../helpers/index.js");
 
 module.exports.createPost = async (req, res) => {
   try {
@@ -16,6 +16,8 @@ module.exports.createPost = async (req, res) => {
       }
       req.body.file = file.url;
     }
+    if (!(req.body.content || req.body.file))
+      return res.json({ success: false });
     var post = new Post({
       content: req.body.content,
       user: req.user._id,
@@ -24,38 +26,36 @@ module.exports.createPost = async (req, res) => {
     });
 
     let result = await post.save();
-    result = (await User.populate(result, {path : 'user'})).toObject()
-    await postFeatures([result], req.user)
-    res.json({ success: true, result  });
+    result = (await User.populate(result, { path: "user" })).toObject();
+    await postFeatures([result], req.user);
+    res.json({ success: true, result });
   } catch (err) {
-    res.json({ success: false, err:err.message });
+    res.json({ success: false, err: err.message });
   }
 };
 
-module.exports.remove = async (req,res)=>{
-  try{
+module.exports.remove = async (req, res) => {
+  try {
     let notifier;
-    var post = await Post.findById(req.params.id)
-    if(req.user._id.toString() !=  post.user.toString()) return res.json({success : false})
-    post.deactivated = true
-    if(post.sharedpost){
+    var post = await Post.findById(req.params.id);
+    if (req.user._id.toString() != post.user.toString())
+      return res.json({ success: false });
+    post.deactivated = true;
+    if (post.sharedpost) {
       notifier = {
-        sender : req.user._id,
-        receiver : (await Post.findById(post.sharedpost).distinct("user"))[0],
+        sender: req.user._id,
+        receiver: (await Post.findById(post.sharedpost).distinct("user"))[0],
         post: post.sharedpost,
         type: "share",
         community: req.community._id
-       }
+      };
     }
-    await Promise.all([
-      post.save(),
-      NotificationHandler.remove(notifier)
-    ])
-    res.json({success : true})
-  }catch (err) {
-    res.json({ success: false, err:err.message });
+    await Promise.all([post.save(), NotificationHandler.remove(notifier)]);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, err: err.message });
   }
-}
+};
 
 module.exports.createEventPost = async (req, res) => {
   try {
@@ -76,26 +76,24 @@ module.exports.createEventPost = async (req, res) => {
       event: req.params.id,
       file: req.body.file
     });
-    
+
     let result = await post.save();
-    result = (await User.populate(result, {path : 'user'})).toObject()
-    await postFeatures([result], req.user)
-    res.json({ success: true, result  });
+    result = (await User.populate(result, { path: "user" })).toObject();
+    await postFeatures([result], req.user);
+    res.json({ success: true, result });
   } catch (err) {
     res.json({ success: false, err });
   }
 };
 
 module.exports.sharePost = async (req, res) => {
-
   let notifier = {
-    sender : req.user._id,
-    receiver : (await Post.findById(req.params.id).distinct("user"))[0],
+    sender: req.user._id,
+    receiver: (await Post.findById(req.params.id).distinct("user"))[0],
     post: req.params.id,
     type: "share",
     community: req.community._id
-   }
-
+  };
 
   try {
     var post = new Post({
@@ -107,17 +105,16 @@ module.exports.sharePost = async (req, res) => {
 
     let result = await post.save();
     result = await Post.findById(result._id)
-    .populate(["user", { path: "sharedpost", populate: { path: "user" } }])
-    .lean();
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }])
+      .lean();
     await Promise.all([
-       postFeatures([result], req.user),
-       NotificationHandler.push(notifier)
-
-    ])
+      postFeatures([result], req.user),
+      NotificationHandler.push(notifier)
+    ]);
 
     res.json({ success: true, result });
   } catch (err) {
-    res.json({ success: false, err:err.message });
+    res.json({ success: false, err: err.message });
   }
 };
 
@@ -138,7 +135,10 @@ module.exports.getPosts = async (req, res, next) => {
     mapped.push({ user: userId });
     let posts = mapped.length
       ? await Post.find({
-          $and: [{ $or: mapped }, { community: communityId, deactivated: false }]
+          $and: [
+            { $or: mapped },
+            { community: communityId, deactivated: false }
+          ]
         })
           .sort({ _id: -1 })
           .limit(20)
@@ -161,14 +161,20 @@ module.exports.getPosts = async (req, res, next) => {
 
 module.exports.getPost = async (req, res, next) => {
   try {
-    let post = await Post.findOne({_id : req.params.id, deactivated:false})
-          .lean()
-          .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-    post.comments = await Comment.find({ post: post._id,deactivated: false }).sort({_id : -1}).populate('user')
-    .limit(5).lean()
-    await Promise.all([postFeatures([post], req.user), commentFeatures(post.comments,req.user)])
-    
-    res.json({ success : true, result : post });
+    let post = await Post.findOne({ _id: req.params.id, deactivated: false })
+      .lean()
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+    post.comments = await Comment.find({ post: post._id, deactivated: false })
+      .sort({ _id: -1 })
+      .populate("user")
+      .limit(5)
+      .lean();
+    await Promise.all([
+      postFeatures([post], req.user),
+      commentFeatures(post.comments, req.user)
+    ]);
+
+    res.json({ success: true, result: post });
   } catch (err) {
     res.json({
       success: false,
@@ -184,12 +190,13 @@ module.exports.getPostsByUserId = async (req, res, next) => {
       user: req.params.id,
       community: req.community._id,
       deactivated: false
-    }).sort({ _id: -1 })
-    .lean()
-    .limit(5)
-    .skip(Number(req.query.page || 0))
-    .populate(['user', {path : 'sharedpost' , populate:{path : 'user'}}])
-    await postFeatures(posts, req.user)
+    })
+      .sort({ _id: -1 })
+      .lean()
+      .limit(5)
+      .skip(Number(req.query.page || 0))
+      .populate(["user", { path: "sharedpost", populate: { path: "user" } }]);
+    await postFeatures(posts, req.user);
     res.json({
       success: true,
       result: posts
@@ -234,12 +241,12 @@ module.exports.getPostsByEvent = async (req, res, next) => {
   }
 };
 
-
-
-
 async function postFeatures(posts, user) {
   async function commentsCount(post) {
-    post.commentsCount = await Comment.count({ post: post._id, deactivated:false });
+    post.commentsCount = await Comment.count({
+      post: post._id,
+      deactivated: false
+    });
   }
   async function likesCount(post) {
     post.likesCount = await Like.count({ post: post._id });
@@ -247,11 +254,18 @@ async function postFeatures(posts, user) {
   async function isLiked(post) {
     post.isLiked = await Like.exists({ post: post._id, user: user._id });
   }
-  async function isShared(post){
-    post.isShared = await Post.exists({user:user._id, sharedpost : post._id, deactivated : false })
+  async function isShared(post) {
+    post.isShared = await Post.exists({
+      user: user._id,
+      sharedpost: post._id,
+      deactivated: false
+    });
   }
-  async function sharesCount(post){
-    post.sharesCount = await Post.count({sharedpost : post._id, deactivated : false })
+  async function sharesCount(post) {
+    post.sharesCount = await Post.count({
+      sharedpost: post._id,
+      deactivated: false
+    });
   }
   await Promise.all(
     posts.map(post => {
